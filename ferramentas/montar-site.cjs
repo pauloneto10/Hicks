@@ -119,7 +119,7 @@ page = fe(page);
 for (const rel of Object.values(scripts)) salvar(rel, fe(fs.readFileSync(path.join(ROOT, rel), 'utf8')));
 
 // Cabeçalho: favicon, preload e Open Graph.
-const SITE = 'https://hicks.vercel.app';
+const SITE = 'https://hicks-burger.vercel.app';
 page = page.replace(/<link rel="icon"[^>]*>/,
   '<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">' +
   '<link rel="apple-touch-icon" href="apple-touch-icon.png">' +

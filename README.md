@@ -4,7 +4,7 @@
 - **Nicho:** hamburgueria autoral.
 - **Canais de pedido:** Cardápio Hick's (hicks.app.br), iFood, 99 Food. Instagram @hicks_br.
 - **Repositório:** github.com/pauloneto10/hicks (privado), branch `main`.
-- **Vercel:** projeto `hicks` (time paulo-neto-s-projects), publica a cada push na `main`.
+- **Vercel:** projeto `hicks-burger` (https://hicks-burger.vercel.app) (time paulo-neto-s-projects), publica a cada push na `main`.
 - **Domínio:** provisório na Vercel. Domínio próprio ainda não definido.
 - **Medição:** não contratada (sem Analytics, sem banner de cookies).
 
