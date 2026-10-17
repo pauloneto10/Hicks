@@ -1,4 +1,10 @@
 (() => {
+  const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (alvo) {
+    document.getElementById('hk-intro')?.remove();
+    addEventListener('load', () => alvo.scrollIntoView(), { once: true });
+    return;
+  }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   scrollTo(0, 0);

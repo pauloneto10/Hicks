@@ -5,6 +5,7 @@
 - **Canais de pedido:** Cardápio Hick's (hicks.app.br), iFood, 99 Food. Instagram @hicks_br.
 - **Repositório:** github.com/pauloneto10/hicks (privado), branch `main`.
 - **Vercel:** projeto `hicks-burger` (https://hicks-burger.vercel.app) (time paulo-neto-s-projects), publica a cada push na `main`.
+- **Páginas:** início, /historia, /bastidores e /central (estas três vêm de `../fonte/paginas/`, do projeto original do Claude Design).
 - **Domínio:** provisório na Vercel. Domínio próprio ainda não definido.
 - **Medição:** não contratada (sem Analytics, sem banner de cookies).
 

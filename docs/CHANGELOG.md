@@ -18,3 +18,8 @@
 
 ## Rodada 3 — 17/10/2026
 - Perguntas frequentes: ao abrir uma pergunta, o texto dela girava em diagonal junto com o ícone. Agora só o "+" gira (vira "×") e a pergunta fica reta.
+
+## Rodada 4 — 17/10/2026
+- Páginas História (/historia), Bastidores (/bastidores) e Central (/central) publicadas, a partir do projeto original do Claude Design ("Hicks Burger app redesign.zip", guardado em fonte/paginas/). Antes, os botões apontavam para seções da própria página inicial, e o "Nossa história e identidade" apontava para a seção em que ele mesmo estava.
+- Quem chega de outra página com destino (ex.: "Ver destaques" na História) vai direto à seção, sem repetir a abertura animada.
+- As três páginas usam o mesmo visual, as mesmas fontes locais e a assinatura "by portlink"; cada uma tem endereço oficial próprio e entrou no sitemap.xml.

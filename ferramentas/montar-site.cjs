@@ -103,6 +103,17 @@ for (const [u, rel] of Object.entries(scripts)) {
       .join('<img src="assets/cardapio/${p.id}.webp" srcset="${__S(\'assets/cardapio/\'+p.id+\'.webp\')}" sizes="(max-width:650px) 100vw, 400px" alt="${p.sub}">');
     js = SRCSET_JS + js;
   }
+  // Quem chega de outra página com destino (ex.: /#proximo-pedido) vai direto à seção, sem a abertura.
+  if (rel.endsWith('abertura.js')) {
+    if (!js.startsWith('(() => {')) throw new Error('início de abertura.js mudou');
+    js = js.replace('(() => {', `(() => {
+  const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (alvo) {
+    document.getElementById('hk-intro')?.remove();
+    addEventListener('load', () => alvo.scrollIntoView(), { once: true });
+    return;
+  }`);
+  }
   if (rel.endsWith('destaques-mobile.js')) {
     const comSrcset = (antes, sizes) => {
       if (!js.includes(antes)) throw new Error('trecho não encontrado em destaques-mobile.js: ' + antes);
@@ -143,10 +154,12 @@ page = page.replace(/<source media="\(max-width:650px\)" srcset="(assets\/cardap
 // O shim do bundle (window.__resources) não é mais necessário.
 page = page.replace(/<script>\(function\(\)\{var R=window\.__resources[\s\S]*?<\/script>/, '');
 
-// Páginas que não vieram no export: aponta para as seções equivalentes.
-page = page.split('href="historia.html"').join('href="#hicks"')
-  .split('href="bastidores.html"').join('href="#cozinha"')
-  .split('href="central.html"').join('href="#acesso"');
+// Páginas internas (geradas no passo 7 a partir de fonte/paginas/), em endereço limpo.
+const links = s => s.split('href="index.html#').join('href="/#').split('href="index.html"').join('href="/"')
+  .split('href="historia.html"').join('href="/historia"')
+  .split('href="bastidores.html"').join('href="/bastidores"')
+  .split('href="central.html"').join('href="/central"');
+page = links(page);
 
 // Seta ↗ e © em versão texto (o iOS 18 desenha ↗ como emoji).
 const fe = s => s.replace(/([↗©])(?!︎)/g, '$1︎');
@@ -228,6 +241,46 @@ page = page.replace('</head>', `<script type="application/ld+json">${JSON.string
 
 fs.writeFileSync(path.join(ROOT, 'index.html'), page);
 
+// 7) Páginas internas: História, Bastidores e Central, do projeto original do Claude Design
+// ("Hicks Burger app redesign.zip", salvo em fonte/paginas/). Usam o mesmo cabeçalho da página
+// inicial (estilos, fontes, assinatura) e só o script de animações de rolagem.
+const PAGINAS = path.join(ROOT, '..', 'fonte', 'paginas');
+const cabeca = page.slice(0, page.indexOf('<body')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+const imgsSub = s => s.split('assets/hicks-word.png').join('assets/img/hicks-logo.png')
+  .split('assets/bulldog-white.png').join('assets/img/bulldog.png')
+  .split('assets/bulldog.png').join('assets/img/bulldog-fundo.png')
+  .split('assets/logo-99food-y.png').join('assets/img/logo-99food.png')
+  .split('assets/logo-ifood.jpg').join('assets/img/logo-ifood.jpg')
+  .split('src="assets/cozinha.jpg"').join('src="assets/img/cozinha.webp"');
+const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const paginas = [];
+for (const nome of ['historia', 'bastidores', 'central']) {
+  const src = fs.readFileSync(path.join(PAGINAS, `${nome}.html`), 'utf8');
+  const titulo = /<title>([^<]*)<\/title>/.exec(src)[1];
+  const desc = /<meta name="description" content="([^"]*)"/.exec(src)[1];
+  const url = `${SITE}/${nome}`;
+  const head = cabeca
+    .replace(/<title>[^<]*<\/title>/, `<title>${titulo}</title>`)
+    .replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${attr(desc)}"`)
+    .replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${attr(titulo)}"`)
+    .replace(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${attr(desc)}"`)
+    .replace(`<link rel="canonical" href="${SITE}/">`, `<link rel="canonical" href="${url}">`)
+    .replace(`<meta property="og:url" content="${SITE}/">`, `<meta property="og:url" content="${url}">`);
+  if (head.includes(`href="${SITE}/"`)) throw new Error('canonical não trocado em ' + nome);
+  let corpo = fe(links(imgsSub(src.slice(src.indexOf('<body')))));
+  const sobraAsset = corpo.match(/(src|href)="assets\/(?!img\/|js\/|cardapio\/|fonts\/)[^"]*"/g);
+  if (sobraAsset) throw new Error(`imagem sem destino em ${nome}: ${sobraAsset.join(', ')}`);
+  corpo = corpo.replace('</footer>', assinatura + '</footer>')
+    .replace('</body>', '<script src="assets/js/animacoes.js" defer></script></body>');
+  fs.writeFileSync(path.join(ROOT, `${nome}.html`), head + corpo);
+  paginas.push(nome);
+}
+fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${['', ...paginas].map(p => `  <url><loc>${SITE}/${p}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod><priority>${p ? '0.6' : '1.0'}</priority></url>`).join('\n')}
+</urlset>
+`);
+
 // Ícones e imagem de compartilhamento (sharp do projeto da Portlink, como na Dale).
 const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modules', 'sharp'));
 (async () => {
@@ -242,6 +295,7 @@ const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modu
     for (const w of [...LARGURAS, 160]) await recomprimir(rel, { quality: 76 }, w, rel.replace('.webp', `-${w}.webp`));
     await recomprimir(rel, { quality: 76 });
   }
+  await sharp(fs.readFileSync(path.join(PAGINAS, 'cozinha.jpg'))).webp({ quality: 80, effort: 6 }).toFile(path.join(ROOT, 'assets/img/cozinha.webp'));
   for (const f of fs.readdirSync(path.join(ROOT, 'assets/img/selos'))) await recomprimir(`assets/img/selos/${f}`, { quality: 80, alphaQuality: 90 });
   const pasta = d => fs.readdirSync(path.join(ROOT, d), { recursive: true }).reduce((s, f) => { const p = path.join(ROOT, d, f); return fs.statSync(p).isFile() ? s + fs.statSync(p).size : s; }, 0);
   console.log(`imagens recomprimidas: assets/ agora com ${(pasta('assets') / 1048576).toFixed(1)} MB`);
