@@ -179,6 +179,8 @@ const assinatura =
   '<span class="portlink-word"><span class="portlink-port">port</span><span class="portlink-link">link</span></span></a></div>';
 page = page.replace('</footer>', assinatura + '</footer>');
 page = page.replace('</head>', `<style>
+/* FAQ: o export gira todo span do summary ao abrir; só o ícone + deve girar, não a pergunta. */
+.faq details[open] summary .faq-q{transform:none!important}
 @font-face{font-family:'Poppins';font-style:normal;font-weight:300;font-display:swap;src:url("assets/fonts/poppins-300-portlink.woff2") format('woff2')}
 @font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url("assets/fonts/poppins-700-portlink.woff2") format('woff2')}
 .portlink-wrap{text-align:center;margin-top:18px}

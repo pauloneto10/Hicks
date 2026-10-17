@@ -15,3 +15,6 @@
 - O carrossel de destaques do celular só é montado quando a pessoa começa a rolar a página, tirando cerca de 0,5 s de trabalho do carregamento.
 - Medição local no padrão de celular do Lighthouse (mediana de 3): nota 72 → 84, peso da primeira visita 2,1 MB → 0,5 MB, primeira pintura 2,4 s → 1,7 s, maior elemento 5,5 s → 3,7 s.
 - Testado e descartado: adiar o desenho das seções fora da tela (content-visibility). Ganhava 0,5 s, mas errava a altura da página e podia desalinhar os botões que levam às seções.
+
+## Rodada 3 — 17/10/2026
+- Perguntas frequentes: ao abrir uma pergunta, o texto dela girava em diagonal junto com o ícone. Agora só o "+" gira (vira "×") e a pergunta fica reta.
