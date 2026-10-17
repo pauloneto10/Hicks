@@ -76,6 +76,10 @@ while ((m = reFace.exec(page))) {
 }
 
 // 4) Scripts.
+// Cada foto do cardápio sai em 480, 800 e 1100 px (passo 6); __S monta o srcset de uma delas.
+const LARGURAS = [480, 800];
+const srcset = u => LARGURAS.map(w => `${u.replace('.webp', `-${w}.webp`)} ${w}w`).concat(`${u} 1100w`).join(', ');
+const SRCSET_JS = `var __S=u=>[${LARGURAS}].map(w=>u.replace('.webp','-'+w+'.webp')+' '+w+'w').concat(u+' 1100w').join(', ');\n`;
 const scripts = {
   '0070c4cd-39c3-48ea-b92b-975c6d0ac803': 'assets/js/lanches.js',
   '9aae66b9-871b-4efd-ba24-c6491767a312': 'assets/js/destaques-mobile.js',
@@ -91,6 +95,34 @@ for (const [u, rel] of Object.entries(scripts)) {
   js = js.split("'assets/hicks-word.png'").join("'assets/img/hicks-logo.png'")
     .split("'assets/logo-99food-y.png'").join("'assets/img/logo-99food.png'")
     .split("'assets/logo-ifood.jpg'").join("'assets/img/logo-ifood.jpg'");
+  // Velocidade: fotos do cardápio em versões menores (srcset), ver passo 6.
+  if (rel.endsWith('lanches.js')) {
+    js = js.split('<img src="assets/cardapio/${p.id}.webp" alt="${p.sub} da Hick’s Burger"')
+      .join('<img src="assets/cardapio/${p.id}.webp" srcset="${__S(\'assets/cardapio/\'+p.id+\'.webp\')}" sizes="(max-width:650px) 100vw, 40vw" alt="${p.sub} da Hick’s Burger"')
+      .split('<img src="assets/cardapio/${p.id}.webp" alt="${p.sub}">')
+      .join('<img src="assets/cardapio/${p.id}.webp" srcset="${__S(\'assets/cardapio/\'+p.id+\'.webp\')}" sizes="(max-width:650px) 100vw, 400px" alt="${p.sub}">');
+    js = SRCSET_JS + js;
+  }
+  if (rel.endsWith('destaques-mobile.js')) {
+    const comSrcset = (antes, sizes) => {
+      if (!js.includes(antes)) throw new Error('trecho não encontrado em destaques-mobile.js: ' + antes);
+      js = js.split(antes).join(antes.replace('<img ', `<img srcset="\${__S(p.image)}" sizes="${sizes}" `));
+    };
+    comSrcset('<img src="${esc(p.image)}" alt="${esc(p.name)} — foto', '90vw');
+    comSrcset('<img src="${esc(p.image)}" alt="${esc(p.name)}" draggable', '70vw');
+    comSrcset('<img class="mobile-dialog-photo" src="${esc(p.image)}"', '100vw');
+    js = js.split('`<img src="${esc(p.image)}" alt="" loading="lazy">`').join('`<img src="${esc(p.image.replace(\'.webp\', \'-160.webp\'))}" alt="" loading="lazy" width="40" height="40">`');
+    js = js.split('<img class="rv-bg" src="${esc(cover(g))}"').join('<img class="rv-bg" src="${esc(cover(g).replace(\'.webp\', \'-800.webp\'))}" loading="lazy"');
+    // O carrossel do celular só é montado quando a pessoa começa a rolar (tirava ~0,5 s do carregamento).
+    const fim = /\n init\(\);\r?\n\}\)\(\);\s*$/;
+    if (!fim.test(js)) throw new Error('fim de destaques-mobile.js mudou');
+    js = SRCSET_JS + js.replace(fim, `
+ const kick = () => { removeEventListener('scroll', kick); removeEventListener('touchstart', kick); init(); };
+ addEventListener('scroll', kick, { passive: true }); addEventListener('touchstart', kick, { passive: true });
+ if ('IntersectionObserver' in window) { const o = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { o.disconnect(); kick(); } }); o.observe(root); } else init();
+})();
+`);
+  }
   salvar(rel, js);
   mapa[u] = rel;
 }
@@ -105,6 +137,9 @@ page = page.split('assets/clean/').join('assets/cardapio/')
 
 // Fontes servidas do próprio domínio: sem preconnect ao Google.
 page = page.replace(/<link rel="preconnect"[^>]*>/g, '');
+// Fotos do cardápio no celular (hero e "qual vai ser hoje?") com versões menores.
+page = page.replace(/<source media="\(max-width:650px\)" srcset="(assets\/cardapio\/\d+\.webp)">(<img class="hero-burger")?/g,
+  (_, u, hero) => `<source media="(max-width:650px)" srcset="${srcset(u)}" sizes="${hero ? '115vw' : '45vw'}">${hero || ''}`);
 // O shim do bundle (window.__resources) não é mais necessário.
 page = page.replace(/<script>\(function\(\)\{var R=window\.__resources[\s\S]*?<\/script>/, '');
 
@@ -128,9 +163,14 @@ page = page.replace(/<link rel="icon"[^>]*>/,
   '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">' +
   '<meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image">' +
   '<link rel="preload" as="font" type="font/woff2" crossorigin href="' +
-  Object.values(mapa).find(r => /barlow-condensed-\d+-latin\.woff2$/.test(r)) + '">' +
-  '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap&text=byportlink">');
+  Object.values(mapa).find(r => /barlow-condensed-\d+-latin\.woff2$/.test(r)) + '">');
+
+// Poppins da assinatura: recorte só com as letras de "by portlink" (1 KB cada), servido daqui.
+// Antes vinha do Google Fonts e travava a primeira pintura da página por ~0,8 s.
+for (const peso of [300, 700]) {
+  const rel = `assets/fonts/poppins-${peso}-portlink.woff2`;
+  salvar(rel, fs.readFileSync(path.join(__dirname, 'recursos', `poppins-${peso}-portlink.woff2`)));
+}
 
 // Assinatura "by portlink" como último elemento do rodapé.
 const assinatura =
@@ -139,6 +179,8 @@ const assinatura =
   '<span class="portlink-word"><span class="portlink-port">port</span><span class="portlink-link">link</span></span></a></div>';
 page = page.replace('</footer>', assinatura + '</footer>');
 page = page.replace('</head>', `<style>
+@font-face{font-family:'Poppins';font-style:normal;font-weight:300;font-display:swap;src:url("assets/fonts/poppins-300-portlink.woff2") format('woff2')}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url("assets/fonts/poppins-700-portlink.woff2") format('woff2')}
 .portlink-wrap{text-align:center;margin-top:18px}
 .portlink-sign{display:inline-flex;align-items:baseline;gap:5px;text-decoration:none;font-family:'Poppins',sans-serif;transition:color .2s ease;padding-bottom:8px;color:rgba(244,244,240,.6)}
 .portlink-sign:hover,.portlink-sign:focus-visible{color:#F4F4F0}
@@ -187,6 +229,21 @@ fs.writeFileSync(path.join(ROOT, 'index.html'), page);
 // Ícones e imagem de compartilhamento (sharp do projeto da Portlink, como na Dale).
 const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modules', 'sharp'));
 (async () => {
+  // 6) Velocidade: recomprime as fotos (o export vem pesado) e gera as versões menores do cardápio.
+  // Qualidade conferida lado a lado com o original: sem diferença visível.
+  const recomprimir = async (rel, opcoes, largura, destino = rel) => {
+    const buf = await sharp(fs.readFileSync(path.join(ROOT, rel))).resize(largura ? { width: largura } : undefined).webp({ effort: 6, ...opcoes }).toBuffer();
+    fs.writeFileSync(path.join(ROOT, destino), buf);
+  };
+  for (const f of fs.readdirSync(path.join(ROOT, 'assets/cardapio'))) {
+    const rel = `assets/cardapio/${f}`;
+    for (const w of [...LARGURAS, 160]) await recomprimir(rel, { quality: 76 }, w, rel.replace('.webp', `-${w}.webp`));
+    await recomprimir(rel, { quality: 76 });
+  }
+  for (const f of fs.readdirSync(path.join(ROOT, 'assets/img/selos'))) await recomprimir(`assets/img/selos/${f}`, { quality: 80, alphaQuality: 90 });
+  const pasta = d => fs.readdirSync(path.join(ROOT, d), { recursive: true }).reduce((s, f) => { const p = path.join(ROOT, d, f); return fs.statSync(p).isFile() ? s + fs.statSync(p).size : s; }, 0);
+  console.log(`imagens recomprimidas: assets/ agora com ${(pasta('assets') / 1048576).toFixed(1)} MB`);
+
   const dog = path.join(ROOT, 'assets/img/bulldog.png');
   const logo = path.join(ROOT, 'assets/img/hicks-logo.png');
   const quadrado = async (lado, margem) => {
