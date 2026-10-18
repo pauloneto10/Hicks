@@ -4,7 +4,7 @@
 <title>Na cozinha da Hicks — Hick’s Burger</title>
 <meta name="description" content="Explore os bastidores e a montagem dos burgers nas publicações oficiais da Hicks.">
 <meta name="theme-color" content="#101010"><meta property="og:title" content="Na cozinha da Hicks — Hick’s Burger"><meta property="og:description" content="Explore os bastidores e a montagem dos burgers nas publicações oficiais da Hicks."><meta property="og:type" content="website">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="canonical" href="https://hicks-burger.vercel.app/bastidores"><meta property="og:url" content="https://hicks-burger.vercel.app/bastidores"><meta property="og:image" content="https://hicks-burger.vercel.app/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/barlow-condensed-500-latin.woff2"><style>/* vietnamese */
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="canonical" href="https://hicksburger.com.br/bastidores"><meta property="og:url" content="https://hicksburger.com.br/bastidores"><meta property="og:image" content="https://hicksburger.com.br/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/barlow-condensed-500-latin.woff2"><style>/* vietnamese */
 @font-face {
   font-family: 'Barlow Condensed';
   font-style: normal;
@@ -284,7 +284,7 @@
  /* Luminance uses the exact original lettering, with its black field invisible. */
  .header .brand{position:relative}
  .header .brand img{opacity:0;mix-blend-mode:normal}
- .header .brand::before{content:"";position:absolute;inset:0;background:#fff;mask-image:url("assets/img/hicks-logo.png");mask-mode:alpha;mask-size:contain;mask-position:center;mask-repeat:no-repeat}
+ .header .brand::before{content:"";position:absolute;inset:0;background:#fff;mask-image:url("assets/img/hicks-word.png");mask-mode:alpha;mask-size:contain;mask-position:center;mask-repeat:no-repeat}
  .mobile-seals{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:8px;background:none;padding:0;margin:26px 0 12px}
  .mobile-seals img{width:100%;height:68px;max-height:none;object-fit:contain;display:block}
 }
@@ -848,13 +848,13 @@
 /* Presença de marca no fundo */
 body::before{content:"";position:fixed;inset:0;z-index:89;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 #reconhecimento,#hicks,#proximo-pedido,#fim,#informacoes{position:relative;isolation:isolate;overflow-x:clip}
-#reconhecimento::before,#hicks::before,#fim::before,#informacoes::before,#proximo-pedido::before{content:"";position:absolute;z-index:-1;pointer-events:none;background:url("assets/img/bulldog.png") center/contain no-repeat;opacity:.045}
+#reconhecimento::before,#hicks::before,#fim::before,#informacoes::before,#proximo-pedido::before{content:"";position:absolute;z-index:-1;pointer-events:none;background:url("assets/img/bulldog-white.png") center/contain no-repeat;opacity:.045}
 #reconhecimento::before{width:340px;height:362px;right:-120px;top:20px;transform:rotate(-8deg)}
 #proximo-pedido::before{width:300px;height:320px;left:-130px;top:-10px;transform:scaleX(-1) rotate(-6deg)}
 #hicks::before{width:420px;height:447px;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.04}
 #informacoes::before{width:260px;height:277px;right:-90px;bottom:-40px;transform:rotate(10deg)}
 #fim::before{width:520px;height:554px;left:50%;bottom:-200px;transform:translateX(-50%);opacity:.05}
-#fim::after{content:"";position:absolute;left:50%;bottom:24px;z-index:-1;width:92%;max-width:620px;aspect-ratio:644/209;transform:translateX(-50%);background:url("assets/img/hicks-logo.png") center/contain no-repeat;opacity:.035;pointer-events:none}
+#fim::after{content:"";position:absolute;left:50%;bottom:24px;z-index:-1;width:92%;max-width:620px;aspect-ratio:644/209;transform:translateX(-50%);background:url("assets/img/hicks-word.png") center/contain no-repeat;opacity:.035;pointer-events:none}
 #fim{padding-bottom:max(var(--fpb,0px),24px)}
 @media (min-width:651px){#reconhecimento::before{width:520px;height:554px;right:-160px}#hicks::before{width:640px;height:681px}}
 
@@ -980,6 +980,225 @@ html.hki-lock,html.hki-lock body{overflow:hidden!important}
 @keyframes hkiLift{to{transform:translateY(-14px) scale(.97);opacity:0;filter:blur(4px)}}
 @keyframes hkiOut{0%{opacity:1}100%{opacity:0;visibility:hidden}}
 @media (prefers-reduced-motion:reduce){#hk-intro{display:none}}
+
+/* Rodada de ajustes — só iFood, sem preços, sem bulldog */
+.header .brand img.brand-h{height:30px!important;width:auto!important;display:block}
+#reconhecimento::before,#hicks::before,#fim::before,#informacoes::before,#proximo-pedido::before{display:none!important}
+.manifesto-strip .mq-h{height:.8em!important;width:auto!important;opacity:.9}
+.access-actions{grid-template-columns:minmax(0,1fr)!important}
+.access-actions .ch-ifood{grid-column:1/-1}
+.cf-price,.mobile-clean-name strong,.product-price,.product-dialog strong{display:none!important}
+.hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+/* Cardápio completo */
+.full-menu{margin-top:26px}
+.fm-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 6px 0 20px;border-radius:999px;border:1.5px solid #3A3A36;background:transparent;color:#F3F0E8;font:inherit;font-size:12px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:border-color .2s}
+.fm-toggle:hover{border-color:#F3F0E8}
+.fm-toggle span{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#F3F0E8;color:#0E0E0D;font-size:16px}
+.fm-body{margin-top:18px;display:flex;flex-direction:column;gap:22px}
+.fm-body[hidden]{display:none}
+.fm-cat h4{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 6px;font-family:var(--display);font-size:20px;font-weight:700;text-transform:uppercase;color:#F3F0E8}
+.fm-cat h4 span{font-family:inherit;font-size:10px;letter-spacing:.1em;color:#7D7A72;font-weight:400}
+.fm-cat ul{list-style:none;margin:0;padding:0}
+.fm-cat li button{display:grid;grid-template-columns:56px minmax(0,1fr) auto auto;align-items:center;gap:12px;width:100%;padding:8px 0;border:0;border-bottom:1px solid #1F1F1C;background:none;color:#F3F0E8;text-align:left;font:inherit;cursor:pointer}
+.fm-cat li:last-child button{border-bottom:0}
+.fm-cat img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#151514}
+.fm-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fm-txt b{font-size:14px;font-weight:600;line-height:1.2}
+.fm-txt small{font-size:11.5px;color:#7D7A72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-cat em{font-style:normal;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7D7A72}
+.fm-cat i{font-style:normal;color:#7D7A72;font-size:13px}
+.mcb-fine{margin:16px 0 0!important;font-size:11.5px!important;color:#7D7A72!important;text-align:center}
+/* Tabela nutricional */
+.pd-nutri{margin-top:22px;padding:16px 18px;border-radius:18px;border:1px solid #2A2A27}
+.pd-nutri dl{margin:10px 0 0;display:flex;flex-direction:column}
+.pd-nutri dl>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #22221F;font-size:13.5px}
+.pd-nutri dl>div:last-child{border-bottom:0}
+.pd-nutri dt{color:#A19E95}
+.pd-nutri dd{margin:0;color:#F3F0E8;font-weight:600;font-variant-numeric:tabular-nums}
+.pd-nutri-note{margin:8px 0 0!important;font-size:11px!important;line-height:1.45!important;color:#7D7A72!important}
+/* FAQ novo */
+#informacoes .faq summary{white-space:normal!important}
+#informacoes .faq .faq-k{padding-bottom:6px!important;color:#F3F0E8!important;font-weight:600}
+#informacoes .faq .faq-steps{margin:4px 0 18px;padding:12px 14px;border-radius:14px;background:#151514;font-size:13px;line-height:1.55;color:#C9C5BB}
+
+.plaque .pl-counting{display:block;margin-top:4px;font-family:var(--display);font-size:22px;font-weight:700;line-height:1;text-transform:uppercase;color:#8C8981}
+@media (min-width:651px){.plaque .pl-counting{font-size:28px}}
+
+/* FAQ: só o ＋ gira; pergunta reta e em linhas completas */
+#informacoes .faq details[open] summary .faq-q,.faq details[open] summary .faq-q{transform:none!important}
+#informacoes .faq summary .faq-q{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;flex:1 1 auto}
+#informacoes .faq summary>span:last-child{flex:0 0 auto}
+#informacoes .faq details[open] summary>span:last-child{transform:rotate(45deg)}
+/* Logo H */
+.header .brand img.brand-h{height:34px!important;width:34px!important;object-fit:contain;mix-blend-mode:screen;border-radius:6px}
+.hki-word{width:96px!important;height:96px!important;object-fit:contain;mix-blend-mode:screen}
+
+.header .brand{width:auto!important}
+.header .brand::before{display:none!important;content:none!important}
+.header .brand img.brand-h{opacity:1!important;mix-blend-mode:screen!important}
+
+.header .brand img.brand-h,.hki-word{mix-blend-mode:normal!important;border-radius:0!important;background:none!important}
+
+.manifesto-strip{margin-top:0!important;margin-bottom:0!important}
+.manifesto-strip+#acesso,.manifesto-strip+section{padding-top:28px!important;margin-top:0!important}
+
+.header{position:relative}
+.header .brand{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%);margin:0!important;z-index:2}
+
+.header{display:flex!important;align-items:center!important;justify-content:center!important;gap:18px!important;border-bottom:0!important;box-shadow:none!important}
+.header::after,.header::before{display:none!important}
+.header .brand{position:static!important;transform:none!important;left:auto;top:auto}
+.header .header-actions{position:static!important;margin:0!important}
+@media (min-width:651px){.header nav{order:3}}
+
+.ch-more-wrap{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:22px}
+.ch-more-wrap .ch-more{margin:0!important}
+.ch-follow{display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.02em;color:#A19E95;text-decoration:none}
+.ch-follow:hover{color:#FFFFFF}
+.chf-dog{height:18px;width:auto;display:block}
+.ch-follow svg{display:block;color:#F3F0E8}
+
+.ch-more-wrap{width:100%;justify-self:stretch;align-self:stretch;text-align:center}
+.ch-more-wrap>a{align-self:center}
+.ch-follow{color:#FFFFFF!important;padding:4px 0 3px;border-bottom:1px solid #FFFFFF}
+.header .nav-ig,.header .header-actions{display:none!important}
+
+.access-actions{overflow:visible!important;height:auto!important}
+.ch-more-wrap{height:auto!important;min-height:0!important;overflow:visible!important;gap:12px!important;margin-top:24px!important;padding-bottom:4px}
+.ch-more-wrap>a{height:auto!important;min-height:0!important;line-height:1.4!important;overflow:visible!important}
+.ch-more-wrap .ch-follow{display:inline-flex!important;align-items:center!important;gap:6px!important;padding:2px 0 5px!important;font-size:13px!important;color:#FFFFFF!important;border:0!important;border-bottom:1px solid #FFFFFF!important;border-radius:0!important;background:none!important}
+.ch-more-wrap .chf-dog{height:16px!important;width:auto!important}
+.ch-more-wrap .ch-follow svg{width:15px;height:15px;flex:0 0 auto}
+
+/* Linhas "conheça" e "siga": sem altura forçada, mesma fonte */
+.access-card{overflow:visible!important}
+.access-actions>.ch-more-wrap{flex:0 0 100%!important;height:auto!important}
+.ch-more-wrap>.ch-more,.ch-more-wrap>.ch-follow{flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important}
+.ch-more-wrap>.ch-more{padding:2px 0!important}
+.ch-more-wrap .ch-follow{font-family:inherit!important;font-size:10.5px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:0!important;text-transform:none!important;padding:2px 0 4px!important;gap:4px!important}
+.ch-more-wrap .chf-dog{height:13px!important}
+.ch-more-wrap .ch-follow svg{width:12px!important;height:12px!important}
+
+/* Intro: o H voa até o header */
+#hk-intro,#hk-intro.hki-done{animation:none!important}
+#hk-intro .hki-stage,#hk-intro.hki-done .hki-stage{animation:none!important}
+.hki-wordwrap{will-change:transform;transform-origin:50% 50%}
+#hk-intro.hki-fly .hki-tag,#hk-intro.hki-fly .hki-skip{opacity:0!important;transition:opacity .35s ease;animation:none!important}
+html.hki-lock .header .brand-h{opacity:0!important}
+
+.ig-above{display:flex!important;justify-content:center;margin:8px 0 14px!important;padding:0!important}
+
+.ch-ifood .ch-tag{display:none!important}
+.ch-ifood{gap:2px!important;padding:0 18px 0 6px!important}
+.access-actions .ch-ifood .ch-brand{height:52px!important}
+.ch-ifood .ch-label{font-size:13px;font-weight:500;letter-spacing:.01em;color:#FFFFFF;white-space:nowrap}
+
+.header .header-actions{display:flex!important;position:absolute!important;left:22px;top:50%;transform:translateY(-50%);margin:0!important}
+.header .nav-ig{display:grid!important;place-items:center;width:40px;height:40px;color:#F3F0E8}
+@media (min-width:651px){.header .header-actions{left:40px}}
+
+.header .header-actions{left:auto!important;right:22px!important}
+@media (min-width:651px){.header .header-actions{right:40px!important}}
+
+.rv-destaques .cf-dots{display:none!important}
+
+.about-symbol{display:flex!important;align-items:center;gap:16px}
+.about-symbol .symbol-dog{height:52px;width:auto;flex:0 0 auto;display:block}
+
+.about-symbol img.symbol-dog{filter:none!important;mix-blend-mode:normal!important;width:auto!important;height:52px!important;opacity:1!important}
+
+/* Todos os CTAs do iFood em vermelho */
+.next-cta .access-actions,.faq-ifood{display:flex!important;justify-content:center;width:100%;max-width:none!important;margin:0!important}
+.next-cta .ch-ifood,.faq-ifood .ch-ifood{flex:1 1 auto;max-width:420px}
+.faq-ifood{margin:0 0 18px!important}
+#informacoes .faq details .faq-ifood a{margin:0!important;border:0!important;font-size:inherit}
+
+.plaque .pl-big .hk-months{font-size:1.9em;line-height:.85;display:inline-block;vertical-align:-.12em;margin-right:.04em}
+
+.footer-top .footer-cta{display:inline-flex;align-items:center;gap:12px;height:50px;margin-top:18px;padding:0 6px 0 22px;border-radius:999px;background:#FFFFFF;color:#0E0E0D;font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;transition:transform .15s,background .2s}
+.footer-top .footer-cta:hover{background:#F3F0E8;color:#0E0E0D}
+.footer-top .footer-cta:active{transform:scale(.97)}
+.footer-top .footer-cta span{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#0E0E0D;color:#FFFFFF;font-size:14px}
+
+.footer-top .footer-h{width:72px!important;height:72px!important;object-fit:contain;filter:none!important;mix-blend-mode:normal!important;margin:0 auto 14px;display:block}
+
+.plaque .award-image.award-compact{display:grid!important;gap:18px!important;align-items:center!important}
+.plaque .award-compact img{object-fit:cover;max-width:none!important;max-height:none!important;border-radius:10px}
+.plaque .award-compact .award-caption{padding-left:0!important}
+.plaque .award-compact .award-text{font-size:13.5px!important}
+
+.footer-bottom .brand{width:auto!important}
+.footer-bottom .brand::before{display:none!important;content:none!important}
+.footer-bottom .brand img.footer-brand-h{width:30px!important;height:30px!important;object-fit:contain;opacity:1!important;filter:none!important;mix-blend-mode:normal!important;display:block}
+
+/* Rodapé organizado */
+.footer-top{display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center;gap:14px!important}
+.footer-top .footer-h{margin:0 auto 4px!important}
+.footer-top h2{margin:0!important}
+.footer-top .footer-ig{margin:2px 0 0!important}
+.footer-top .footer-cta{margin-top:6px!important}
+#fim .footer-hours{margin:40px auto 0!important;max-width:360px!important}
+#fim .footer-hours h3{text-align:center}
+.footer-bottom{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:40px 0 10px!important;text-align:center}
+.footer-bottom .brand img.footer-brand-h{width:28px!important;height:28px!important}
+.footer-bottom p.fb-tag{display:block!important;margin:0!important;font-size:12px!important;letter-spacing:.04em!important;text-transform:none;color:#A19E95!important}
+#fim .legal{margin:6px 0 0!important;padding-bottom:28px;font-size:11px!important;line-height:1.6!important;letter-spacing:.02em;color:#7D7A72!important;text-align:center}
+#fim .legal .hk-word{height:.9em!important;width:auto!important;display:inline-block!important;vertical-align:-.1em;opacity:.8}
+
+/* Placa — layout limpo */
+.plaque .award-image.award-compact{display:grid!important;grid-template-columns:112px minmax(0,1fr)!important;gap:20px!important;align-items:center!important;margin-top:18px}
+.plaque .award-compact img{width:112px!important;height:auto!important;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block}
+.plaque .award-compact .award-caption{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:0!important;padding:0!important;margin:0!important;border:0!important;text-align:left}
+.plaque .award-compact .award-caption::before,.plaque .award-compact .award-caption::after{display:none!important}
+.plaque .pl-num{display:flex;align-items:baseline;gap:8px;font-family:var(--display);text-transform:uppercase;color:#F3F0E8;line-height:.85;letter-spacing:0}
+.plaque .pl-num b{font-size:64px;font-weight:800;letter-spacing:-.02em}
+.plaque .pl-num span{font-size:26px;font-weight:700;letter-spacing:0}
+.plaque .award-compact .pl-counting{display:block;margin:6px 0 0!important;font-family:inherit!important;font-size:13px!important;font-weight:500;letter-spacing:.02em!important;text-transform:none!important;color:#A19E95!important;line-height:1.3}
+.plaque .award-compact .award-text{display:block;margin:12px 0 0!important;font-size:13.5px!important;line-height:1.45!important;color:#C9C5BB!important;max-width:24ch!important}
+.plaque .award-compact .award-caption em{margin-top:14px!important;font-size:11px!important;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#F3F0E8;border-bottom:1px solid #F3F0E8;padding-bottom:2px}
+@media (min-width:651px){.plaque .award-image.award-compact{grid-template-columns:160px minmax(0,1fr)!important}.plaque .award-compact img{width:160px!important}.plaque .pl-num b{font-size:88px}.plaque .pl-num span{font-size:34px}}
+
+.plaque .award-compact .award-caption .pl-num b{font-size:64px!important;color:#F3F0E8!important;letter-spacing:-.02em!important;margin:0!important;font-weight:800!important;line-height:.85!important}
+.plaque .award-compact .pl-counting{line-height:1.3!important;height:auto!important}
+@media (min-width:651px){.plaque .award-compact .award-caption .pl-num b{font-size:88px!important}}
+
+/* Placa — destaque Super Restaurante */
+#placa{padding:72px 22.65px 64px!important;overflow:hidden}
+#placa .pq{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:460px;margin:0 auto}
+#placa .pq-eye{display:flex;align-items:center;gap:8px;margin:0 0 18px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#C9C5BB}
+#placa .pq-badge{padding:6px 11px;border-radius:999px;background:#fe001a;color:#FFFFFF;font-weight:600;letter-spacing:.1em}
+#placa .pq-num{display:flex;align-items:center;gap:12px;font-family:var(--display);color:#F3F0E8;text-transform:uppercase}
+#placa .pq-n{font-size:168px;font-weight:800;line-height:.78;letter-spacing:-.04em}
+#placa .pq-unit{font-size:30px;font-weight:700;line-height:.95;text-align:left}
+#placa .pq-live{display:flex;align-items:center;gap:8px;margin:16px 0 0;font-size:13px;letter-spacing:.04em;color:#A19E95}
+#placa .pq-live i{width:8px;height:8px;border-radius:50%;background:#fe001a;box-shadow:0 0 0 0 rgba(254,0,26,.6);animation:pqPulse 1.8s ease-out infinite}
+#placa .pq-ticks{display:grid;grid-template-columns:repeat(23,minmax(0,1fr));gap:4px;width:100%;margin:28px 0 0}
+#placa .pq-ticks i{display:block;height:20px;border-radius:2px;background:#F3F0E8;transform:scaleY(0);transform-origin:50% 100%;transition:transform .5s cubic-bezier(.2,.8,.2,1) var(--d)}
+#placa .pq-ticks.on i{transform:scaleY(1)}
+#placa .pq-ticks i.now{background:#fe001a;animation:pqBlink 1.8s ease-in-out infinite}
+#placa .pq-what{margin:28px 0 0;font-size:15px;line-height:1.55;color:#C9C5BB;text-wrap:pretty;max-width:34ch}
+#placa .pq-crit{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:16px 0 0;padding:0;list-style:none}
+#placa .pq-crit li{padding:8px 12px;border-radius:999px;border:1px solid #2C2C29;font-size:12px;color:#F3F0E8}
+#placa .pq-plaque{display:flex;align-items:center;gap:16px;margin:32px 0 0;padding:12px 18px 12px 12px;border-radius:20px;background:#151514;border:1px solid #23231F;text-decoration:none;color:#F3F0E8;text-align:left}
+#placa .pq-plaque img{width:72px;height:96px;object-fit:cover;border-radius:8px;display:block;transform:rotate(-4deg);box-shadow:0 10px 24px rgba(0,0,0,.5)}
+#placa .pq-plaque-cap{display:flex;flex-direction:column;gap:6px}
+#placa .pq-plaque-cap b{font-family:var(--display);font-size:22px;font-weight:700;text-transform:uppercase;line-height:1}
+#placa .pq-plaque-cap em{font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#A19E95}
+#placa .pq-plaque:hover em{color:#FFFFFF}
+@keyframes pqPulse{0%{box-shadow:0 0 0 0 rgba(254,0,26,.55)}70%{box-shadow:0 0 0 10px rgba(254,0,26,0)}100%{box-shadow:0 0 0 0 rgba(254,0,26,0)}}
+@keyframes pqBlink{0%,100%{opacity:1}50%{opacity:.35}}
+@media (min-width:651px){#placa .pq-n{font-size:240px}#placa .pq-unit{font-size:40px}#placa .pq{max-width:620px}}
+@media (prefers-reduced-motion:reduce){#placa .pq-ticks i{transform:none;transition:none}#placa .pq-live i,#placa .pq-ticks i.now{animation:none}}
+
+#placa .pq-plaque-cap em{text-transform:none!important;letter-spacing:.01em!important;font-size:12.5px!important}
+
+#placa .pq-crit{flex-wrap:nowrap!important;gap:5px!important;width:100%}
+#placa .pq-crit li{flex:1 1 0;min-width:0;padding:8px 6px!important;font-size:11px!important;line-height:1.2;text-align:center;white-space:normal}
+
+#placa .pq-crit li{display:flex!important;align-items:center;justify-content:center;min-height:44px;background:#FFFFFF!important;border-color:#FFFFFF!important;color:#0E0E0D!important;font-weight:600}
+
+#placa .pq-crit li{gap:5px}
+#placa .pq-crit li::before{content:"";flex:0 0 auto;width:14px;height:14px;border-radius:50%;background:#fe001a url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M4 8.2l2.6 2.6L12 5.4%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.2%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") center/10px no-repeat}
 </style>
 
 
@@ -1024,10 +1243,8 @@ html.hki-lock,html.hki-lock body{overflow:hidden!important}
 
 
 
-
-
 <style>
-/* FAQ: o export gira todo span do summary ao abrir; só o ícone + deve girar, não a pergunta. */
+/* FAQ: só o ícone + gira ao abrir, não a pergunta. */
 .faq details[open] summary .faq-q{transform:none!important}
 @font-face{font-family:'Poppins';font-style:normal;font-weight:300;font-display:swap;src:url("assets/fonts/poppins-300-portlink.woff2") format('woff2')}
 @font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url("assets/fonts/poppins-700-portlink.woff2") format('woff2')}
@@ -1039,4 +1256,4 @@ html.hki-lock,html.hki-lock body{overflow:hidden!important}
 .portlink-port{font-weight:300}.portlink-link{font-weight:700}
 @media(max-width:650px){.portlink-wrap{padding-bottom:70px}}
 </style></head>
-<body><a class="skip" href="#conteudo">Pular para o conteúdo</a><header class="header"><a class="brand" href="/" aria-label="Hick’s Burger — início"><img src="assets/img/hicks-logo.png" width="644" height="209" alt="Hick’s Burger"></a><nav aria-label="Navegação principal"><a href="/historia">A <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209"></a><a href="/#lanches">Os lanches</a><a href="/bastidores">Bastidores</a></nav><div class="header-actions"><a class="nav-ig" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Hicks — @hicks_br"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></a></div></header><main id="conteudo"><section class="sub-hero section-wrap"><a class="back" href="/">← Voltar para a <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209"></a><p class="eyebrow">DIRETO DA NOSSA COZINHA</p><h1>Tem mão.<br>Tem chapa. Tem <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209">.</h1><p>Antes de chegar à sua porta, cada burger passa por aqui.</p></section><section class="behind-layout section-wrap"><div><img class="behind-photo" src="assets/img/cozinha.webp" alt="Mão finalizando um burger na chapa, em publicação da Hicks" width="360" height="640"><p class="fine" style="margin-top:15px">Registro publicado no perfil oficial da <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209"> em 15/10/2026.</p></div><div><p class="eyebrow" style="margin-bottom:20px">O SIMPLES BEM FEITO, DE PERTO.</p><h2>A montagem<br>também conta<br><em>a nossa história.</em></h2><p>O pão encontra o burger, o queijo e os ingredientes de cada combinação. É no preparo que o cardápio ganha vida.</p><p>Acompanhe as publicações da <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209"> para ver a cozinha em movimento, os produtos e os bastidores da casa.</p><a class="button light" href="https://www.instagram.com/hicks_br/reel/DefTuWJOLf_/" target="_blank" rel="noopener noreferrer">Ver o preparo no Instagram <span>↗︎</span></a><div class="steps"><div class="step"><span>01</span><div><h3>Na chapa</h3><p>O preparo visto de perto, no perfil da marca.</p></div></div><div class="step"><span>02</span><div><h3>Em cada camada</h3><p>Montagens e combinações que fazem parte da <img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209">.</p></div></div><div class="step"><span>03</span><div><h3>Da cozinha para a sua fome</h3><p>Escolha o produto e consulte os canais de delivery.</p></div></div></div><a class="text-link" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer">Explore mais bastidores <span>↗︎</span></a></div></section><section class="sub-cta section-wrap"><h2>Viu de perto.<br><em>Agora deu fome.</em></h2><a class="button light" href="/central">Escolha onde pedir <span>↗︎</span></a></section></main><footer class="footer" id="fim"><div class="footer-top"><img class="footer-dog" src="assets/img/bulldog.png" alt="Bulldog da Hicks" width="385" height="410"><h2>Segue o <em>Bulldog.</em></h2><a class="footer-ig" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @hicks_br"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg><span>@hicks_br</span></a></div><div class="hours footer-hours"><h3>Horários da cozinha</h3><dl><div><dt>Segunda</dt><dd>18h — 23h</dd></div><div><dt>Terça e quarta</dt><dd>Fechado</dd></div><div><dt>Quinta a sábado</dt><dd>18h — 23h</dd></div><div><dt>Domingo</dt><dd>18h30 — 23h</dd></div></dl></div><div class="footer-bottom"><a class="brand" href="/"><img src="assets/img/hicks-logo.png" alt="Hick’s Burger" width="644" height="209"></a><p>BURGER AUTORAL. SIMPLES BEM FEITO.</p><a class="footer-order" href="https://hicks.app.br/hicks_burger_e_hotdog" target="_blank" rel="noopener noreferrer">faça o seu pedido <span>↗︎</span></a></div><p class="legal"><img class="hk-word" src="assets/img/hicks-logo.png" alt="Hick’s" width="644" height="209"> · Campinas — SP · CNPJ 36.635.421/0001-36</p><div class="portlink-wrap"><a href="https://useportlink.com" target="_blank" rel="noopener" aria-label="by portlink" class="portlink-sign"><span class="portlink-by">by</span><span class="portlink-word"><span class="portlink-port">port</span><span class="portlink-link">link</span></span></a></div></footer><div class="mobile-order"><span>DEU FOME?</span><a href="/central">Escolha onde pedir ↗︎</a></div><script src="assets/js/animacoes.js" defer></script></body></html>
+<body><a class="skip" href="#conteudo">Pular para o conteúdo</a><header class="header"><a class="brand" href="/portlink" aria-label="Hick’s Burger — início"><img class="brand-h" src="assets/img/hicks-h-clear.png" width="150" height="150" alt="Hick’s Burger"></a><nav aria-label="Navegação principal"><a href="/historia">A <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209"></a><a href="/portlink#lanches">Os lanches</a><a href="/bastidores">Bastidores</a></nav><div class="header-actions"><a class="nav-ig" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Hicks — @hicks_br"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></a></div></header><main id="conteudo"><section class="sub-hero section-wrap"><a class="back" href="/portlink">← Voltar para a <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209"></a><p class="eyebrow">DIRETO DA NOSSA COZINHA</p><h1>Tem mão.<br>Tem chapa. Tem <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209">.</h1><p>Antes de chegar à sua porta, cada burger passa por aqui.</p></section><section class="behind-layout section-wrap"><div><img class="behind-photo" src="assets/img/cozinha.jpg" alt="Mão finalizando um burger na chapa, em publicação da Hicks" width="360" height="640"><p class="fine" style="margin-top:15px">Registro publicado no perfil oficial da <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209"> em 15/10/2026.</p></div><div><p class="eyebrow" style="margin-bottom:20px">O SIMPLES BEM FEITO, DE PERTO.</p><h2>A montagem<br>também conta<br><em>a nossa história.</em></h2><p>O pão encontra o burger, o queijo e os ingredientes de cada combinação. É no preparo que o cardápio ganha vida.</p><p>Acompanhe as publicações da <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209"> para ver a cozinha em movimento, os produtos e os bastidores da casa.</p><a class="button light" href="https://www.instagram.com/hicks_br/reel/DefTuWJOLf_/" target="_blank" rel="noopener noreferrer">Ver o preparo no Instagram <span>↗︎</span></a><div class="steps"><div class="step"><span>01</span><div><h3>Na chapa</h3><p>O preparo visto de perto, no perfil da marca.</p></div></div><div class="step"><span>02</span><div><h3>Em cada camada</h3><p>Montagens e combinações que fazem parte da <img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209">.</p></div></div><div class="step"><span>03</span><div><h3>Da cozinha para a sua fome</h3><p>Escolha o produto e consulte os canais de delivery.</p></div></div></div><a class="text-link" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer">Explore mais bastidores <span>↗︎</span></a></div></section><section class="sub-cta section-wrap"><h2>Viu de perto.<br><em>Agora deu fome.</em></h2><a class="button light" href="/central">Escolha onde pedir <span>↗︎</span></a></section></main><footer class="footer" id="fim"><div class="footer-top"><img class="footer-dog footer-h" src="assets/img/hicks-h-clear.png" alt="Hick’s" width="150" height="150"><h2>Segue o <em>Bulldog.</em></h2><a class="footer-ig" href="https://www.instagram.com/hicks_br/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @hicks_br"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg><span>@hicks_br</span></a><a class="footer-cta" href="https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1" target="_blank" rel="noopener noreferrer">Peça agora <span>↗︎</span></a></div><div class="hours footer-hours"><h3>Horários da cozinha</h3><dl><div><dt>Quarta a segunda</dt><dd>18h — 23h</dd></div><div><dt>Terça-feira</dt><dd>Fechado</dd></div></dl></div><div class="footer-bottom"><a class="brand" href="/portlink"><img class="footer-brand-h" src="assets/img/hicks-h-clear.png" alt="Hick’s Burger" width="150" height="150"></a><p class="fb-tag">Burger autoral. Simples bem feito.</p></div><p class="legal"><img class="hk-word" src="assets/img/hicks-word.png" alt="Hick’s" width="644" height="209"> · Campinas — SP · CNPJ 36.635.421/0001-36</p><div class="portlink-wrap"><a href="https://useportlink.com" target="_blank" rel="noopener" aria-label="by portlink" class="portlink-sign"><span class="portlink-by">by</span><span class="portlink-word"><span class="portlink-port">port</span><span class="portlink-link">link</span></span></a></div></footer><div class="mobile-order"><span>DEU FOME?</span><a href="/central">Escolha onde pedir ↗︎</a></div><script src="assets/js/scroll-motion.js" defer></script></body></html>

@@ -1,4 +1,7 @@
 (() => {
+  const now = new Date();
+  const HK_MONTHS = 46 + (now.getFullYear() - 2026) * 12 + (now.getMonth() - 9);
+  document.querySelectorAll('.hk-months').forEach(el => { el.textContent = HK_MONTHS; });
   const lazyVid = document.querySelector('.kitchen-video[data-src]');
   if (lazyVid) {
     const start = () => { if (lazyVid.src) return; lazyVid.src = lazyVid.dataset.src; lazyVid.muted = true; const p = lazyVid.play(); if (p && p.catch) p.catch(() => {}); };
@@ -70,7 +73,7 @@
       ctl.addEventListener('click', () => go(cur + 1 >= n ? 0 : cur + 1));
     }
     const INFO = [
-      '12 meses seguidos como destaque no iFood.',
+      HK_MONTHS + ' meses seguidos como Super Restaurante iFood.',
       'Entre os 10 melhores burgers de Campinas.',
       'O mesmo padrão, todos os dias do ano.',
       'Carne Angus com origem certificada.',
@@ -110,5 +113,12 @@
     };
     addEventListener('scroll', () => { if (!tk) { tk = true; requestAnimationFrame(upd); } }, { passive: true });
     addEventListener('resize', upd); upd();
+  }
+  // Placa: um traço por mês, o último pulsando
+  const ticks = document.querySelector('#placa .pq-ticks');
+  if (ticks) {
+    ticks.innerHTML = Array.from({ length: HK_MONTHS }, (_, i) => '<i style="--d:' + (i * 18) + 'ms"' + (i === HK_MONTHS - 1 ? ' class="now"' : '') + '></i>').join('');
+    const o = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { ticks.classList.add('on'); o.disconnect(); } }, { threshold: .4 });
+    o.observe(ticks);
   }
 })();

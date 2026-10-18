@@ -23,3 +23,11 @@
 - Páginas História (/historia), Bastidores (/bastidores) e Central (/central) publicadas, a partir do projeto original do Claude Design ("Hicks Burger app redesign.zip", guardado em fonte/paginas/). Antes, os botões apontavam para seções da própria página inicial, e o "Nossa história e identidade" apontava para a seção em que ele mesmo estava.
 - Quem chega de outra página com destino (ex.: "Ver destaques" na História) vai direto à seção, sem repetir a abertura animada.
 - As três páginas usam o mesmo visual, as mesmas fontes locais e a assinatura "by portlink"; cada uma tem endereço oficial próprio e entrou no sitemap.xml.
+
+## Rodada 5 — 18/10/2026 (versão nova do Claude Design)
+- Página principal agora em https://hicksburger.com.br/portlink (a raiz redireciona para lá). Páginas internas em /historia, /bastidores e /central. Endereço oficial, sitemap e robots apontando para hicksburger.com.br.
+- Versão nova aplicada: monograma H no cabeçalho, ícone e favicon; só iFood como canal; preços escondidos; cardápio completo; contador "46 meses seguidos"; FAQ novo; horário quarta a segunda, 18h às 23h, terça fechado.
+- As três páginas internas também na versão nova (fonte/projeto/, do zip "Hicks Burger app redesign.zip").
+- Montador reescrito: reconhece cada imagem e script do export pelo conteúdo, comparando com o projeto original. Um export novo não quebra mais por causa dos códigos internos que mudam a cada vez.
+- Dados para o Google (Schema.org) atualizados: horário novo, as 5 perguntas do FAQ, cardápio no iFood. O montador para e avisa se o horário da página mudar sem atualizar esses dados.
+- Cache: scripts conferidos a cada visita e imagens guardadas por 7 dias (antes, 1 ano), para ninguém ficar com imagem ou script antigo depois de uma rodada.

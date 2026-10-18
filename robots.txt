@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hicks-burger.vercel.app/sitemap.xml
+Sitemap: https://hicksburger.com.br/sitemap.xml
