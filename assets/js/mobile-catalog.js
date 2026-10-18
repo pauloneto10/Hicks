@@ -145,7 +145,7 @@ var __S=u=>[480,800].map(w=>u.replace('.webp','-'+w+'.webp')+' '+w+'w').concat(u
     if (/alface|cebola|picles|pepino|jalapeño|rúcula/.test(s)) return 'veg';
     if (/alho/.test(s)) return 'garlic';
     return 'other'; };
-  let out = '';
+  let out = p.destaque ? `<p class="pd-blurb">${esc(p.destaque)}</p>` : '';
   if (blurb && !(isBurger && ing.length)) out += `<p class="pd-blurb">${esc(blurb)}</p>`;
   if (isBurger && ing.length) {
     const items = ing.map(t => ({ t, k: kind(t) }));

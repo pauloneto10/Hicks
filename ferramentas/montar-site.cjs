@@ -111,7 +111,27 @@ const trocar = (js, nome, antes, depois) => {
   return js.split(antes).join(depois);
 };
 // Seta ↗ e © em versão texto (o iOS 18 desenha ↗ como emoji).
-const fe = s => s.replace(/([↗©])(?!︎)/g, '$1︎');
+const fe0 = s => s.replace(/([↗©])(?!︎)/g, '$1︎');
+
+// A marca é sempre masculina: "o Hicks", "do Hicks", "no Hicks" (decisão do Neto, 18/10/2026).
+// Vale para o nome escrito e para o logo em imagem (hk-word) logo depois do artigo.
+const MARCA = String.raw`(?:Hick[’']?s|HICK[’']?S|<img class="hk-word"[^>]*>)`;
+const ARTIGOS = { a: 'o', da: 'do', na: 'no', pela: 'pelo', 'à': 'ao' };
+const reArtigo = new RegExp(String.raw`(^|[^\wÀ-ÿ])(a|da|na|pela|à)(\s+)(?=${MARCA})`, 'gi');
+const masculino = s => s
+  .replace(reArtigo, (_, antes, art, esp) => {
+    const novo = ARTIGOS[art.toLowerCase()];
+    const caixa = art === art.toUpperCase() && art !== art.toLowerCase() ? novo.toUpperCase()
+      : art[0] === art[0].toUpperCase() && art[0] !== art[0].toLowerCase() ? novo[0].toUpperCase() + novo.slice(1) : novo;
+    return antes + caixa + esp;
+  })
+  .replace(/Nascida(\s+no\s+quintal\.(?:\s|<br>)*)Feita(\s+pra\s+ser)/g, 'Nascido$1Feito$2');
+const conferirMasculino = (s, onde) => {
+  const sobra = s.match(new RegExp(String.raw`(?:^|[^\wÀ-ÿ])(?:a|da|na|pela|à)\s+${MARCA}|Nascida no quintal|Feita pra ser daqui`, 'gi'));
+  if (sobra) throw new Error(`marca no feminino em ${onde}: ${sobra.slice(0, 3).join(' | ')}`);
+  return s;
+};
+const fe = s => fe0(masculino(s));
 
 for (const [rel, original] of Object.entries(scripts)) {
   let js = original;
@@ -140,6 +160,8 @@ for (const [rel, original] of Object.entries(scripts)) {
     comSrcset('<img src="${esc(p.image)}" alt="${esc(p.name)}" draggable', '70vw');
     comSrcset('<img class="mobile-dialog-photo" src="${esc(p.image)}"', '100vw');
     js = js.split('`<img src="${esc(p.image)}" alt="" loading="lazy">`').join('`<img src="${esc(p.image.replace(\'.webp\', \'-160.webp\'))}" alt="" loading="lazy" width="40" height="40">`');
+    // Ficha do produto: o campo "destaque" (CARDAPIO_AJUSTES) aparece antes da estrutura do lanche.
+    js = trocar(js, nome, "let out = '';", "let out = p.destaque ? `<p class=\"pd-blurb\">${esc(p.destaque)}</p>` : '';");
     js = js.split('<img class="rv-bg" src="${esc(cover(g))}"').join('<img class="rv-bg" src="${esc(cover(g).replace(\'.webp\', \'-800.webp\'))}" loading="lazy"');
     // O carrossel do celular só é montado quando a pessoa começa a rolar (tirava ~0,5 s do carregamento).
     const fim = /\n init\(\);\r?\n\}\)\(\);\s*$/;
@@ -151,11 +173,41 @@ for (const [rel, original] of Object.entries(scripts)) {
 })();
 `);
   }
-  salvar(rel, fe(caminhos(js)));
+  salvar(rel, conferirMasculino(fe(caminhos(js)), rel));
 }
 
 // 4) Página principal.
 for (const [u, rel] of Object.entries(mapa)) page = page.split(u).join(rel);
+
+// Ajustes de texto do cardápio (pedidos do Neto). Só fatos do cardápio oficial: 100 g de peito de
+// frango empanado, maionese defumada artesanal, alface. O nome "Kentucky | Frango Crocante" faz o
+// subtítulo virar "Frango Crocante" (sem o "|" a página mostrava "Angus Premium no pão brioche").
+const FRANGO_KENTUCKY = 'O frango é a estrela: peito de frango de 100 g, empanado até ficar dourado e crocante por fora e macio por dentro.';
+const CARDAPIO_AJUSTES = {
+  2108710: {
+    name: 'Kentucky | Frango Crocante',
+    destaque: FRANGO_KENTUCKY,
+    description: 'Peito de frango empanado de 100 g\nMaionese defumada artesanal\nAlface\n\n' +
+      FRANGO_KENTUCKY + ' A maionese defumada artesanal e a alface fresca completam um burger simples e bem feito.',
+  },
+  2108456: {
+    destaque: FRANGO_KENTUCKY,
+    description: 'Peito de frango empanado de 100 g\nMaionese defumada artesanal\nAlface\nFritas\nBebida de sua escolha\n\n' +
+      FRANGO_KENTUCKY + ' Com maionese defumada artesanal e alface fresca, acompanhado de fritas e bebida à sua escolha.',
+  },
+};
+{
+  const tag = '<script id="mobile-catalog-data" type="application/json">';
+  const [antes, resto] = page.split(tag);
+  const fim = resto.indexOf('</script>');
+  const cat = JSON.parse(resto.slice(0, fim));
+  for (const [id, ajuste] of Object.entries(CARDAPIO_AJUSTES)) {
+    const item = cat.find(p => p.id === Number(id));
+    if (!item) throw new Error(`item ${id} sumiu do cardápio: revise CARDAPIO_AJUSTES`);
+    Object.assign(item, ajuste);
+  }
+  page = antes + tag + JSON.stringify(cat).replace(/</g, '\\u003c') + resto.slice(fim);
+}
 page = caminhos(page);
 // Fontes servidas do próprio domínio: sem preconnect ao Google.
 page = page.replace(/<link rel="preconnect"[^>]*>/g, '');
@@ -253,7 +305,7 @@ const ld = {
 page = page.replace('</head>', `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script></head>`);
 
 fs.rmSync(path.join(ROOT, 'index.html'), { force: true }); // a raiz redireciona para /portlink (vercel.json)
-fs.writeFileSync(path.join(ROOT, 'portlink.html'), page);
+fs.writeFileSync(path.join(ROOT, 'portlink.html'), conferirMasculino(page, 'portlink.html'));
 
 // 5) Páginas internas: História, Bastidores e Central, do projeto original. Usam o mesmo cabeçalho da
 // página principal (estilos, fontes, assinatura) e só o script de animações de rolagem.
@@ -262,8 +314,8 @@ const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const paginas = [];
 for (const nome of ['historia', 'bastidores', 'central']) {
   const src = fs.readFileSync(path.join(PROJETO, `${nome}.html`), 'utf8');
-  const titulo = /<title>([^<]*)<\/title>/.exec(src)[1];
-  const desc = /<meta name="description" content="([^"]*)"/.exec(src)[1];
+  const titulo = masculino(/<title>([^<]*)<\/title>/.exec(src)[1]);
+  const desc = masculino(/<meta name="description" content="([^"]*)"/.exec(src)[1]);
   const url = `${SITE}/${nome}`;
   const head = cabeca
     .replace(/<title>[^<]*<\/title>/, `<title>${titulo}</title>`)
@@ -278,7 +330,7 @@ for (const nome of ['historia', 'bastidores', 'central']) {
   if (faltando.length) throw new Error(`arquivo inexistente em ${nome}: ${faltando.join(', ')}`);
   corpo = corpo.replace('</footer>', assinatura + '</footer>')
     .replace('</body>', '<script src="assets/js/scroll-motion.js" defer></script></body>');
-  fs.writeFileSync(path.join(ROOT, `${nome}.html`), head + corpo);
+  fs.writeFileSync(path.join(ROOT, `${nome}.html`), conferirMasculino(head + corpo, `${nome}.html`));
   paginas.push(nome);
 }
 const hoje = new Date().toISOString().slice(0, 10);

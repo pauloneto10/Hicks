@@ -31,3 +31,7 @@
 - Montador reescrito: reconhece cada imagem e script do export pelo conteúdo, comparando com o projeto original. Um export novo não quebra mais por causa dos códigos internos que mudam a cada vez.
 - Dados para o Google (Schema.org) atualizados: horário novo, as 5 perguntas do FAQ, cardápio no iFood. O montador para e avisa se o horário da página mudar sem atualizar esses dados.
 - Cache: scripts conferidos a cada visita e imagens guardadas por 7 dias (antes, 1 ano), para ninguém ficar com imagem ou script antigo depois de uma rodada.
+
+## Rodada 6 — 18/10/2026
+- A marca é sempre masculina: "o Hicks", "do Hicks", "no Hicks", "pelo Hicks", "ao Hicks" (antes "a/da/na/pela/à Hick's"), em todas as páginas, scripts, títulos, descrições e no cardápio. "Nascida no quintal. Feita pra ser daqui." virou "Nascido no quintal. Feito pra ser daqui." O montador aplica a regra a cada versão nova e para se sobrar algum feminino.
+- Kentucky: nome "Kentucky | Frango Crocante" (o subtítulo mostrava "Angus Premium no pão brioche"), mini descrição do frango em destaque na ficha ("O frango é a estrela: peito de frango de 100 g, empanado até ficar dourado e crocante por fora e macio por dentro.") e ingredientes corrigidos. O Combo Kentucky recebeu a mesma descrição do frango.
