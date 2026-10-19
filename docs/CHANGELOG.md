@@ -35,3 +35,7 @@
 ## Rodada 6 — 18/10/2026
 - A marca é sempre masculina: "o Hicks", "do Hicks", "no Hicks", "pelo Hicks", "ao Hicks" (antes "a/da/na/pela/à Hick's"), em todas as páginas, scripts, títulos, descrições e no cardápio. "Nascida no quintal. Feita pra ser daqui." virou "Nascido no quintal. Feito pra ser daqui." O montador aplica a regra a cada versão nova e para se sobrar algum feminino.
 - Kentucky: nome "Kentucky | Frango Crocante" (o subtítulo mostrava "Angus Premium no pão brioche"), mini descrição do frango em destaque na ficha ("O frango é a estrela: peito de frango de 100 g, empanado até ficar dourado e crocante por fora e macio por dentro.") e ingredientes corrigidos. O Combo Kentucky recebeu a mesma descrição do frango.
+
+## Rodada 7 — 19/10/2026
+- Título do rodapé nas quatro páginas: "Segue o Bulldog." virou "Segue o Hicks." (mesmo estilo, "Hicks." em destaque cinza).
+- Chicken Salad: subtítulo "Chicken Salad Supreme" (antes aparecia "Angus Premium no pão brioche").

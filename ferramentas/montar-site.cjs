@@ -131,7 +131,9 @@ const conferirMasculino = (s, onde) => {
   if (sobra) throw new Error(`marca no feminino em ${onde}: ${sobra.slice(0, 3).join(' | ')}`);
   return s;
 };
-const fe = s => fe0(masculino(s));
+// Título do rodapé (pedido do Neto, 19/10/2026): "Segue o Bulldog." → "Segue o Hicks.".
+const rodape = s => s.split('<h2>Segue o <em>Bulldog.</em></h2>').join('<h2>Segue o <em>Hicks.</em></h2>');
+const fe = s => fe0(rodape(masculino(s)));
 
 for (const [rel, original] of Object.entries(scripts)) {
   let js = original;
@@ -184,6 +186,8 @@ for (const [u, rel] of Object.entries(mapa)) page = page.split(u).join(rel);
 // subtítulo virar "Frango Crocante" (sem o "|" a página mostrava "Angus Premium no pão brioche").
 const FRANGO_KENTUCKY = 'O frango é a estrela: peito de frango de 100 g, empanado até ficar dourado e crocante por fora e macio por dentro.';
 const CARDAPIO_AJUSTES = {
+  // Subtítulo "Chicken Salad Supreme" (pedido do Neto, 19/10/2026); antes caía em "Angus Premium no pão brioche".
+  2108702: { name: 'Chicken Salad | Chicken Salad Supreme' },
   2108710: {
     name: 'Kentucky | Frango Crocante',
     destaque: FRANGO_KENTUCKY,
