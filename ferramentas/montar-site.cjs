@@ -127,12 +127,15 @@ const masculino = s => s
   })
   .replace(/Nascida(\s+no\s+quintal\.(?:\s|<br>)*)Feita(\s+pra\s+ser)/g, 'Nascido$1Feito$2');
 const conferirMasculino = (s, onde) => {
+  if (/segue o (<em>|<span[^>]*>)?bulldog/i.test(s)) throw new Error(`"Segue o Bulldog" voltou em ${onde}`);
   const sobra = s.match(new RegExp(String.raw`(?:^|[^\wÀ-ÿ])(?:a|da|na|pela|à)\s+${MARCA}|Nascida no quintal|Feita pra ser daqui`, 'gi'));
   if (sobra) throw new Error(`marca no feminino em ${onde}: ${sobra.slice(0, 3).join(' | ')}`);
   return s;
 };
-// Título do rodapé (pedido do Neto, 19/10/2026): "Segue o Bulldog." → "Segue o Hicks.".
-const rodape = s => s.split('<h2>Segue o <em>Bulldog.</em></h2>').join('<h2>Segue o <em>Hicks.</em></h2>');
+// "Segue o Bulldog" não existe mais (pedido do Neto, 19/10/2026): vira "Segue o Hicks" em todo lugar
+// (rodapé, faixa, História, link do Instagram), mantendo a caixa e a marcação de destaque.
+const rodape = s => s.replace(/(segue o )(<em>|<span class="hk-font">)?bulldog/gi,
+  (_, a, tag) => a + (tag || '') + (a === a.toUpperCase() ? 'HICKS' : 'Hicks'));
 const fe = s => fe0(rodape(masculino(s)));
 
 for (const [rel, original] of Object.entries(scripts)) {
@@ -231,9 +234,22 @@ const links = s => s.split('href="index.html#').join('href="/portlink#').split('
   .split('href="central.html"').join('href="/central"');
 page = fe(links(page));
 
-// Cabeçalho: favicon, endereço oficial, Open Graph e preload da fonte de título.
+// Título e descrição (Google, WhatsApp e redes). Só fatos: Angus e frango crocante, pão brioche,
+// Super Restaurante iFood, pedido pelo iFood, 18h às 23h. Sem o número de meses (o contador muda).
+const TITULO_HOME = 'Hick’s Burger — Hamburgueria em Campinas';
+const DESC_HOME = 'Hamburgueria em Campinas, só delivery: burgers autorais de Angus e frango crocante no pão brioche. Super Restaurante iFood. Peça pelo iFood, das 18h às 23h.';
+const DESC_COMPARTILHAR = 'Burgers autorais de Angus e frango crocante, com entrega em Campinas. Super Restaurante iFood. Peça pelo iFood.';
+const trocarMeta = (s, re, novo, nome) => { if (!re.test(s)) throw new Error('meta ausente: ' + nome); return s.replace(re, novo); };
+page = trocarMeta(page, /<title>[^<]*<\/title>/, `<title>${TITULO_HOME}</title>`, 'title');
+page = trocarMeta(page, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${DESC_HOME}">`, 'description');
+page = trocarMeta(page, /<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${TITULO_HOME}">`, 'og:title');
+page = trocarMeta(page, /<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${DESC_COMPARTILHAR}">`, 'og:description');
+
+// Cabeçalho: ícones (monograma H), endereço oficial, Open Graph e preload da fonte de título.
 page = page.replace(/<link rel="icon"[^>]*>/,
+  '<link rel="icon" href="/favicon.ico" sizes="48x48">' +
   '<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">' +
+  '<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">' +
   '<link rel="apple-touch-icon" href="apple-touch-icon.png">' +
   `<link rel="canonical" href="${HOME}">` +
   `<meta property="og:url" content="${HOME}"><meta property="og:image" content="${SITE}/og.jpg">` +
@@ -316,13 +332,17 @@ fs.writeFileSync(path.join(ROOT, 'portlink.html'), conferirMasculino(page, 'port
 
 // 5) Páginas internas: História, Bastidores e Central, do projeto original. Usam o mesmo cabeçalho da
 // página principal (estilos, fontes, assinatura) e só o script de animações de rolagem.
+// Descrições próprias (a do projeto da Central ainda citava Cardápio Web e 99).
+const DESC_PAGINAS = {
+  central: 'Onde pedir o Hicks em Campinas: peça pelo iFood, de quarta a segunda, das 18h às 23h. Acompanhe também o Instagram @hicks_br.',
+};
 const cabeca = page.slice(0, page.indexOf('<body')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
 const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const paginas = [];
 for (const nome of ['historia', 'bastidores', 'central']) {
   const src = fs.readFileSync(path.join(PROJETO, `${nome}.html`), 'utf8');
   const titulo = masculino(/<title>([^<]*)<\/title>/.exec(src)[1]);
-  const desc = masculino(/<meta name="description" content="([^"]*)"/.exec(src)[1]);
+  const desc = DESC_PAGINAS[nome] || masculino(/<meta name="description" content="([^"]*)"/.exec(src)[1]);
   const url = `${SITE}/${nome}`;
   const head = cabeca
     .replace(/<title>[^<]*<\/title>/, `<title>${titulo}</title>`)
@@ -376,11 +396,37 @@ const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modu
   };
   await (await quadrado(32, 3)).toFile(path.join(ROOT, 'favicon-32.png'));
   await (await quadrado(180, 30)).toFile(path.join(ROOT, 'apple-touch-icon.png'));
+  await (await quadrado(192, 30)).toFile(path.join(ROOT, 'icon-192.png'));
+  await (await quadrado(512, 80)).toFile(path.join(ROOT, 'icon-512.png'));
+  // favicon.ico (16, 32 e 48 px, PNG dentro do .ico): o endereço que o Google e os navegadores pedem primeiro.
+  const pngs = await Promise.all([[16, 1], [32, 3], [48, 5]].map(async ([l, m]) => (await quadrado(l, m)).toBuffer()));
+  const cab = Buffer.alloc(6 + 16 * pngs.length);
+  cab.writeUInt16LE(0, 0); cab.writeUInt16LE(1, 2); cab.writeUInt16LE(pngs.length, 4);
+  let pos = cab.length;
+  pngs.forEach((b, i) => {
+    const l = [16, 32, 48][i], o = 6 + 16 * i;
+    cab.writeUInt8(l, o); cab.writeUInt8(l, o + 1); cab.writeUInt16LE(1, o + 4); cab.writeUInt16LE(32, o + 6);
+    cab.writeUInt32LE(b.length, o + 8); cab.writeUInt32LE(pos, o + 12); pos += b.length;
+  });
+  fs.writeFileSync(path.join(ROOT, 'favicon.ico'), Buffer.concat([cab, ...pngs]));
+
+  // Imagem de compartilhamento (WhatsApp, redes): H + "Hamburgueria em Campinas" + Baba-Yaga.
   const burger = await sharp(path.join(ROOT, 'assets/cardapio/2108707.webp')).resize(630, 630).toBuffer();
-  const marca = await sharp(path.join(ROOT, 'assets/img/hicks-word.png')).resize(420).toBuffer();
-  const frase = Buffer.from(`<svg width="520" height="120" xmlns="http://www.w3.org/2000/svg"><text x="0" y="40" fill="#f4f1e9" font-family="Arial Narrow, Arial, sans-serif" font-weight="700" font-size="40">BURGER AUTORAL.</text><text x="0" y="90" fill="#aaa8a1" font-family="Arial Narrow, Arial, sans-serif" font-weight="700" font-size="40">SIMPLES BEM FEITO.</text></svg>`);
+  const monograma = await sharp(h).resize(96, 96, { fit: 'contain', background: '#00000000' }).toBuffer();
+  const fonte = `font-family="Bahnschrift, 'Arial Narrow', Arial, sans-serif" font-stretch="condensed"`;
+  const frase = Buffer.from(`<svg width="560" height="330" xmlns="http://www.w3.org/2000/svg">
+<text x="0" y="78" fill="#f4f1e9" ${fonte} font-weight="700" font-size="78">HAMBURGUERIA</text>
+<text x="0" y="160" fill="#aaa8a1" ${fonte} font-weight="700" font-size="78">EM CAMPINAS.</text>
+<text x="2" y="232" fill="#f4f1e9" ${fonte} font-weight="400" font-size="30">Burger autoral. Simples bem feito.</text>
+<text x="2" y="280" fill="#8c8981" ${fonte} font-weight="400" font-size="24">Super Restaurante iFood · Só delivery</text>
+</svg>`);
   await sharp({ create: { width: 1200, height: 630, channels: 3, background: '#101010' } })
-    .composite([{ input: burger, left: 570, top: 0 }, { input: marca, left: 70, top: 170 }, { input: frase, left: 74, top: 330 }])
-    .jpeg({ quality: 84, mozjpeg: true }).toFile(path.join(ROOT, 'og.jpg'));
+    .composite([
+      { input: burger, left: 570, top: 0 },
+      // Degradê que esconde a emenda entre o fundo e a foto.
+      { input: Buffer.from('<svg width="180" height="630" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g"><stop offset="0" stop-color="#101010"/><stop offset="1" stop-color="#101010" stop-opacity="0"/></linearGradient></defs><rect width="180" height="630" fill="url(#g)"/></svg>'), left: 570, top: 0 },
+      { input: monograma, left: 70, top: 92 }, { input: frase, left: 70, top: 222 },
+    ])
+    .jpeg({ quality: 86, mozjpeg: true }).toFile(path.join(ROOT, 'og.jpg'));
 })();
 console.log(`portlink.html ${(Buffer.byteLength(page) / 1024).toFixed(0)} KB · ${Object.keys(mapa).length} arquivos do bundle reconhecidos · páginas: ${paginas.join(', ')}`);

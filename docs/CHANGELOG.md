@@ -42,3 +42,10 @@
 
 ## Rodada 8 — 19/10/2026
 - Subtítulos no lugar do genérico "Angus Premium no pão brioche": Quarterão Angus Premium → "Releitura do Clássico do Méqui"; Cheese Salada → "Releitura Shake Shack"; Cheese Burger → "Pão, carne e queijo".
+
+## Rodada 9 — 19/10/2026 (SEO do link)
+- Título: "Hick’s Burger — Hamburgueria em Campinas" (Google e WhatsApp; antes "Burger autoral. Simples bem feito." e "Segue o Bulldog").
+- Descrição nova no Google: "Hamburgueria em Campinas, só delivery: burgers autorais de Angus e frango crocante no pão brioche. Super Restaurante iFood. Peça pelo iFood, das 18h às 23h." No WhatsApp, versão curta. Descrição da Central corrigida (citava Cardápio Web e 99).
+- Ícone: monograma H em favicon.ico (16/32/48), 32, 192, 512 e ícone do iPhone.
+- Imagem de compartilhamento nova: H + "Hamburgueria em Campinas." + Baba-Yaga.
+- "Segue o Bulldog" não existe mais: virou "Segue o Hicks" na faixa, na História e no link do Instagram da Central. O montador trava se a frase voltar.
