@@ -49,3 +49,6 @@
 - Ícone: monograma H em favicon.ico (16/32/48), 32, 192, 512 e ícone do iPhone.
 - Imagem de compartilhamento nova: H + "Hamburgueria em Campinas." + Baba-Yaga.
 - "Segue o Bulldog" não existe mais: virou "Segue o Hicks" na faixa, na História e no link do Instagram da Central. O montador trava se a frase voltar.
+
+## Rodada 10 — 19/10/2026
+- Botão do Pinterest (br.pinterest.com/hicks_br) ao lado do Instagram no topo das quatro páginas, no mesmo estilo. Perfil incluído nos dados para o Google (sameAs).
