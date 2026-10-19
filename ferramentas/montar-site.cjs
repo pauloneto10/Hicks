@@ -188,6 +188,9 @@ const FRANGO_KENTUCKY = 'O frango é a estrela: peito de frango de 100 g, empana
 const CARDAPIO_AJUSTES = {
   // Subtítulo "Chicken Salad Supreme" (pedido do Neto, 19/10/2026); antes caía em "Angus Premium no pão brioche".
   2108702: { name: 'Chicken Salad | Chicken Salad Supreme' },
+  5101889: { name: 'Quarterão Angus Premium | Releitura do Clássico do Méqui' },
+  2108709: { name: 'Cheese Salada | Releitura Shake Shack' },
+  2108708: { name: 'Cheese Burger | Pão, carne e queijo' },
   2108710: {
     name: 'Kentucky | Frango Crocante',
     destaque: FRANGO_KENTUCKY,

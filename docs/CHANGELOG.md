@@ -39,3 +39,6 @@
 ## Rodada 7 — 19/10/2026
 - Título do rodapé nas quatro páginas: "Segue o Bulldog." virou "Segue o Hicks." (mesmo estilo, "Hicks." em destaque cinza).
 - Chicken Salad: subtítulo "Chicken Salad Supreme" (antes aparecia "Angus Premium no pão brioche").
+
+## Rodada 8 — 19/10/2026
+- Subtítulos no lugar do genérico "Angus Premium no pão brioche": Quarterão Angus Premium → "Releitura do Clássico do Méqui"; Cheese Salada → "Releitura Shake Shack"; Cheese Burger → "Pão, carne e queijo".
