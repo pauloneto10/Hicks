@@ -25,6 +25,7 @@ const HOME = `${SITE}/portlink`;
 const IFOOD = 'https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1';
 const PINTEREST = 'https://br.pinterest.com/hicks_br/';
 const INSTAGRAM = 'https://www.instagram.com/hicks_br/';
+const SPOTIFY = 'https://open.spotify.com/playlist/5bKJJZ1BPGHgVfaiMxymSI';
 const agora = new Date();
 const MESES = 46 + (agora.getFullYear() - 2026) * 12 + (agora.getMonth() - 9);
 const MES_ANO = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -139,6 +140,10 @@ for (const { origem, rota } of paginas) {
     .replace(/\bsrcset="([^"]*)"/g, (m, v) => `srcset="${v.split(',').map(s => { const [u, w] = s.trim().split(/\s+/); return endereco(u) + (w ? ' ' + w : ''); }).join(', ')}"`)
     .replace(/url\((["']?)(?!data:|https?:|#)([^"')]+)\1\)/g, (m, q, u) => `url(${q}${endereco(u)}${q})`)
     .replace(/"(url|image)":"([^"]+)"/g, (m, k, u) => `"${k}":"${endereco(u)}"`);
+
+  // 5.2b Ícone do Spotify no topo: o design apontava para a página inicial do Spotify; vai para a playlist do Hicks
+  //      (link enviado pelo Neto em 20/10/2026, sem os parâmetros de rastreio).
+  h = h.split('href="https://open.spotify.com/"').join(`href="${SPOTIFY}"`).split('aria-label="Spotify do Hicks"').join('aria-label="Playlist do Hicks no Spotify"');
 
   // 5.3 Cabeçalho de SEO: sai o que veio do design, entra o padrão do montador.
   h = h.replace(/<title>[\s\S]*?<\/title>/g, '')

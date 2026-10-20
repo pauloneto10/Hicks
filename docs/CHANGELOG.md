@@ -72,3 +72,4 @@
 - Rodapé "Explore o Hicks" de volta (os guias tinham ficado sem links internos; "Melhor hambúrguer de Campinas" não recebia nenhum).
 - Scripts das páginas movidos para arquivos (a política de segurança bloqueava scripts dentro do HTML).
 - História, Bastidores e Central saíram: redirecionamento permanente para /hamburgueria-autoral-campinas, /portlink#cozinha e /portlink#acesso.
+- 20/10/2026: ícone do Spotify no topo das páginas passa a abrir a playlist do Hicks (https://open.spotify.com/playlist/5bKJJZ1BPGHgVfaiMxymSI); antes abria a página inicial do Spotify.
