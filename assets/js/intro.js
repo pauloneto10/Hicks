@@ -1,10 +1,4 @@
 (() => {
-  const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-  if (alvo) {
-    document.getElementById('hk-intro')?.remove();
-    addEventListener('load', () => alvo.scrollIntoView(), { once: true });
-    return;
-  }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   scrollTo(0, 0);
@@ -32,13 +26,7 @@
     const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
     src.style.animation = 'none'; src.style.clipPath = 'none';
     src.style.transition = 'transform 1.15s cubic-bezier(.65,0,.25,1)';
-    requestAnimationFrame(() => {
-  const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-  if (alvo) {
-    document.getElementById('hk-intro')?.remove();
-    addEventListener('load', () => alvo.scrollIntoView(), { once: true });
-    return;
-  } src.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${s.toFixed(4)})`; });
+    requestAnimationFrame(() => { src.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${s.toFixed(4)})`; });
     setTimeout(end, 1200);
   };
   el.addEventListener('click', fly);

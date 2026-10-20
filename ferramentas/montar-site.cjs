@@ -18,6 +18,19 @@ const html = fs.readFileSync(SRC, 'utf8');
 
 const SITE = 'https://hicksburger.com.br';
 const HOME = `${SITE}/portlink`;
+// Páginas de SEO (burgers, guias, cardápio): conteúdo em conteudo-seo.cjs, moldes em paginas-seo.cjs.
+const SEO = require('./paginas-seo.cjs');
+const IFOOD = 'https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1';
+const lerCatalogo = html => JSON.parse(html.split('<script id="mobile-catalog-data" type="application/json">')[1].split('</script>')[0]);
+// Endereços absolutos (/assets/...) para as páginas em subpasta, como /burgers/baba-yaga.
+const absolutizar = h => h
+  .replace(/\b(src|href|data-src|poster)="(?!https?:|\/|#|mailto:|tel:|data:)([^"]+)"/g, '$1="/$2"')
+  .replace(/\bsrcset="([^"]+)"/g, (_, v) => `srcset="${v.split(',').map(s => s.trim().replace(/^(?!https?:|\/)/, '/')).join(', ')}"`)
+  .replace(/url\("(?!https?:|\/|data:)/g, 'url("/');
+// Meses seguidos de Super Restaurante, como o contador da página (46 em outubro de 2026).
+const agora = new Date();
+const MESES_SUPER = 46 + (agora.getFullYear() - 2026) * 12 + (agora.getMonth() - 9);
+const MES_ANO = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
 const bloco = tipo => {
   const a = html.indexOf(`<script type="${tipo}">`);
@@ -175,7 +188,30 @@ for (const [rel, original] of Object.entries(scripts)) {
     comSrcset('<img src="${esc(p.image)}" alt="${esc(p.name)}" draggable', '70vw');
     comSrcset('<img class="mobile-dialog-photo" src="${esc(p.image)}"', '100vw');
     js = js.split('`<img src="${esc(p.image)}" alt="" loading="lazy">`').join('`<img src="${esc(p.image.replace(\'.webp\', \'-160.webp\'))}" alt="" loading="lazy" width="40" height="40">`');
-    // Ficha do produto: o campo "destaque" (CARDAPIO_AJUSTES) aparece antes da estrutura do lanche.
+    // "Qual vai ser hoje?": tabela nutricional do lanche escolhido, logo antes de "Ver lanche".
+    // Os dados vêm de <script id="hk-nutri" type="application/json"> (montado no passo 4).
+    js = trocar(js, nome, '<span class="cf-price"></span><button type="button" class="cf-open">',
+      '<span class="cf-price"></span><details class="cf-nutri"><summary>Tabela nutricional</summary><div class="cf-nutri-corpo"></div></details><button type="button" class="cf-open">');
+    js = trocar(js, nome, "   priceEl.innerHTML = '';\n", "   priceEl.innerHTML = '';\n   hkNutri(root, p);\n");
+    // Prévia da tabela nutricional (informação do Hicks): porção, calorias e os principais nutrientes,
+    // com link para a tabela completa na página do burger. Usada no carrossel e na ficha "Ver lanche".
+    js = `var hkNutriDados=(function(){var d=null;return function(){if(!d){try{d=JSON.parse(document.getElementById('hk-nutri').textContent)}catch(e){d={}}}return d}})();
+var hkNutriCorpo=function(n){
+ var linha=function(a,b){return '<div><dt>'+a+'</dt><dd>'+b+'</dd></div>'};
+ return '<dl>'+linha('Porção',n.porcao)+linha(n.combo?'Valor energético do lanche':'Valor energético',n.k+' <small>'+n.vd+' VD</small>')+n.linhas.map(function(l){return linha(l[0],l[1])}).join('')+'</dl>'+
+  (n.url?'<a class="cf-nutri-mais" href="'+n.url+'">Tabela completa <span>↗︎</span></a>':'')+'<p>'+(n.ap?'Valores aproximados. ':'')+(n.ref?'Porção de referência do fabricante. ':'')+'Informação nutricional fornecida pelo Hicks.</p>';
+};
+var hkNutri=function(root,p){var box=root.querySelector('.cf-nutri');if(!box)return;var n=hkNutriDados()[p.id];
+ if(!n){box.hidden=true;return}box.hidden=false;box.querySelector('.cf-nutri-corpo').innerHTML=hkNutriCorpo(n);};
+` + js;
+    // Ficha "Ver lanche": a tabela do design (estimativa de calorias) dá lugar à informação do Hicks.
+    const reFicha = /function nutriHTML\(p\) \{[\s\S]*?\n \}\n/;
+    if (!reFicha.test(js)) throw new Error('nutriHTML mudou em mobile-catalog.js');
+    js = js.replace(reFicha, `function nutriHTML(p) {
+  const n = hkNutriDados()[p.id]; if (!n) return '';
+  return '<div class="pd-nutri"><span class="pd-ing-h">Tabela nutricional</span>' + hkNutriCorpo(n) + '</div>';
+ }
+`);
     js = trocar(js, nome, "let out = '';", "let out = p.destaque ? `<p class=\"pd-blurb\">${esc(p.destaque)}</p>` : '';");
     js = js.split('<img class="rv-bg" src="${esc(cover(g))}"').join('<img class="rv-bg" src="${esc(cover(g).replace(\'.webp\', \'-800.webp\'))}" loading="lazy"');
     // O carrossel do celular só é montado quando a pessoa começa a rolar (tirava ~0,5 s do carregamento).
@@ -244,6 +280,41 @@ const links = s => s.split('href="index.html#').join('href="/portlink#').split('
   .split('href="central.html"').join('href="/central"');
 page = comPinterest(fe(links(page)), 'portlink');
 
+// Educar antes de pedir (decisão do Neto, 19/10/2026): ao longo da página, os botões levam a conteúdo
+// (burgers, guias, bastidores). O pedido no iFood fica no fim: depois de "Conheça cada burger", no FAQ e no rodapé.
+{
+  const troca = (antes, depois, onde) => {
+    if (!antes.test(page)) throw new Error(`educar antes de pedir: trecho não encontrado (${onde})`);
+    page = page.replace(antes, depois);
+  };
+  const ifood = 'href="https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1" target="_blank" rel="noopener noreferrer"';
+  const reIfood = ifood.replace(/[.?*+^$()[\]{}|\\/]/g, '\\$&');
+  // Abertura: "Pedir agora" → conhecer os burgers.
+  troca(new RegExp(`<a class="button light hero-order-btn" ${reIfood}>Pedir agora <span>↗︎</span></a>`),
+    '<a class="button light hero-order-btn" href="#burgers">Conheça os burgers <span>↓</span></a>', 'abertura');
+  // "Sua fome tem endereço": botão do iFood → como funciona a entrega.
+  troca(new RegExp(`(<section id="acesso"[\\s\\S]*?)<a class="ch ch-ifood" ${reIfood}>[\\s\\S]*?</a>`),
+    '$1<a class="button light" href="/hamburgueria-aberta-a-noite-campinas">Como funciona a entrega <span>↗︎</span></a>', 'sua fome tem endereço');
+  // Reconhecimento: por que o Hicks é Super Restaurante.
+  troca(/(<section[^>]*id="reconhecimento"[\s\S]*?)(<\/div><\/section>)/,
+    '$1<a class="text-link sx-edu" href="/super-restaurante-ifood">Por que somos Super Restaurante <span>↗︎</span></a>$2', 'reconhecimento');
+  // Principais lanches (desktop): "Cardápio completo" → o nosso cardápio.
+  troca(new RegExp(`<a class="text-link" ${reIfood}>Cardápio completo ↗︎</a>`),
+    '<a class="text-link" href="/cardapio">Cardápio completo ↗︎</a>', 'principais lanches');
+  // Qual vai ser hoje?: botão do iFood → guia de escolha; cartões → páginas dos burgers e combos.
+  troca(new RegExp(`(<div class="next-cta"><div class="access-actions">)<a class="ch ch-ifood" ${reIfood}>[\\s\\S]*?</a>`),
+    '$1<a class="button light" href="/qual-hamburguer-escolher">Qual burger escolher? <span>↗︎</span></a>', 'qual vai ser hoje (botão)');
+  const cartoes = [['Conheça o Duplo Aversa', '/burgers/duplo-aversa', null], ['Confira as ofertas do momento', '/cardapio#combos', 'Conheça os combos'], ['Explore o Baba-Yaga', '/burgers/baba-yaga', null]];
+  for (const [texto, href, novo] of cartoes) {
+    troca(new RegExp(`<a class="choice-card" ${reIfood}>([\\s\\S]*?)<span>${texto} ↗︎</span>`),
+      `<a class="choice-card" href="${href}">$1<span>${novo || texto} ↗︎</span>`, 'cartão ' + texto);
+  }
+  // Cozinha: os bastidores.
+  page = page.replace(/(<div class="kitchen-(?:head|copy)">[\s\S]*?<\/p>)(<\/div>)/g,
+    '$1<a class="text-link sx-edu" href="/bastidores">Ver os bastidores <span>↗︎</span></a>$2');
+  if ((page.match(/href="\/bastidores">Ver os bastidores/g) || []).length < 1) throw new Error('educar antes de pedir: cozinha');
+}
+
 // Título e descrição (Google, WhatsApp e redes). Só fatos: Angus e frango crocante, pão brioche,
 // Super Restaurante iFood, pedido pelo iFood, 18h às 23h. Sem o número de meses (o contador muda).
 const TITULO_HOME = 'Hick’s Burger — Hamburgueria em Campinas';
@@ -279,7 +350,42 @@ const assinatura =
   '<div class="portlink-wrap"><a href="https://useportlink.com" target="_blank" rel="noopener" aria-label="by portlink" class="portlink-sign">' +
   '<span class="portlink-by">by</span>' +
   '<span class="portlink-word"><span class="portlink-port">port</span><span class="portlink-link">link</span></span></a></div>';
-page = page.replace('</footer>', assinatura + '</footer>');
+page = page.replace('</footer>', SEO.RODAPE_LINKS + assinatura + '</footer>');
+
+// Região atendida, logo abaixo de "Sua fome tem endereço" (pedido do Neto, 19/10/2026).
+// Bairro: o do cadastro do Hicks no iFood (endereço da loja: .../campinas-sp/hicks--burger-vila-boa-vista/...).
+const REGIAO = `<div class="sx-regiao" aria-labelledby="regiao-titulo"><p class="eyebrow" id="regiao-titulo">REGIÃO ATENDIDA</p><dl>
+<div><dt>Cidade</dt><dd>Campinas, SP</dd></div>
+<div><dt>Bairro</dt><dd>Vila Boa Vista<small>base de delivery do Hicks</small></dd></div>
+<div><dt>Horário</dt><dd>Quarta a segunda, 18h às 23h<small>terça fechado</small></dd></div>
+</dl><p class="sx-regiao-nota">Só delivery. Informe o seu endereço no iFood para confirmar a entrega na sua região.</p></div>`;
+if (!/(<section id="acesso"[\s\S]*?)(<\/section>)/.test(page)) throw new Error('seção "Sua fome tem endereço" não encontrada');
+page = page.replace(/(<section id="acesso"[\s\S]*?)(<\/section>)/, `$1${REGIAO}$2`);
+
+// Seção nova antes das perguntas frequentes: um cartão por burger e o menu suspenso da tabela nutricional.
+if (!/<section[^>]*id="informacoes"/.test(page)) throw new Error('seção de informações não encontrada na página principal');
+page = page.replace(/<section[^>]*id="informacoes"/, m => SEO.secaoHome({ catalogo: lerCatalogo(page), IFOOD }) + m);
+{ // Nenhum link para o iFood antes de "Conheça cada burger" (fora dos dados escondidos em <script>).
+  const ate = page.slice(page.indexOf('<body'), page.indexOf('id="burgers"')).replace(/<script\b[\s\S]*?<\/script>/g, '');
+  const n = (ate.match(/href="https:\/\/www\.ifood\.com\.br/g) || []).length;
+  if (n) throw new Error(`educar antes de pedir: ainda há ${n} link(s) do iFood antes de "Conheça cada burger"`);
+}
+page = page.replace('</head>', `<style>${SEO.CSS}</style></head>`);
+// Dados da tabela nutricional do carrossel "Qual vai ser hoje?" (burgers e os combos de cada um).
+const nutri = {};
+{ // Informação nutricional do Hicks (ferramentas/nutricao.cjs) para a prévia do carrossel e da ficha.
+  const { NUTRI } = require('./nutricao.cjs');
+  const PREVIA = [['prot', 'Proteínas'], ['carb', 'Carboidratos'], ['gord', 'Gorduras totais'], ['sodio', 'Sódio']];
+  const previa = (id, extra) => { const t = NUTRI[id]; if (!t) return;
+    nutri[id] = { k: `${t.kcal.toLocaleString('pt-BR')} kcal`, vd: t.kcalVD, porcao: t.porcao, ap: t.aprox || undefined, ref: t.ref || undefined,
+      linhas: PREVIA.filter(([k]) => t.n[k]).map(([k, r]) => [r, t.n[k][0]]), ...extra }; };
+  for (const b of SEO.BURGERS) {
+    previa(b.id, { url: `/burgers/${b.slug}` });
+    if (b.combo && nutri[b.id]) nutri[b.combo] = { ...nutri[b.id], combo: true }; // o combo mostra os dados do lanche
+  }
+  for (const id of Object.keys(NUTRI)) if (!nutri[id]) previa(id); // acompanhamentos
+}
+page = page.replace('</body>', `<script id="hk-nutri" type="application/json">${JSON.stringify(nutri).replace(/</g, '\\u003c')}</script></body>`);
 page = page.replace('</head>', `<style>
 /* FAQ: só o ícone + gira ao abrir, não a pergunta. */
 .faq details[open] summary .faq-q{transform:none!important}
@@ -306,12 +412,13 @@ const faq = [...page.matchAll(/<details><summary><span class="faq-q">([\s\S]*?)<
   });
 // Horário informado ao Google: confere com o que a página mostra, para não publicar dado velho.
 const HORARIO_PAGINA = 'Quarta a segunda 18h — 23h Terça-feira Fechado';
-const horario = texto((page.match(/<dl>[\s\S]*?<\/dl>/) || [''])[0].replace(/<\/(dt|dd)>/g, ' '));
+// Fonte oficial: a tabela de horários do rodapé (class "footer-hours").
+const horario = texto((page.match(/class="[^"]*footer-hours[^"]*"[\s\S]*?(<dl>[\s\S]*?<\/dl>)/) || ['', ''])[1].replace(/<\/(dt|dd)>/g, ' '));
 if (horario !== HORARIO_PAGINA) throw new Error(`horário da página mudou ("${horario}"): atualize openingHoursSpecification e HORARIO_PAGINA`);
-const IFOOD = 'https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1';
 const ld = {
   '@context': 'https://schema.org',
   '@graph': [
+    { '@type': 'WebSite', '@id': `${SITE}/#site`, url: HOME, name: 'Hick’s Burger', inLanguage: 'pt-BR', publisher: { '@id': `${HOME}#restaurante` } },
     {
       '@type': 'Restaurant',
       '@id': `${HOME}#restaurante`,
@@ -324,7 +431,8 @@ const ld = {
       taxID: '36.635.421/0001-36',
       address: { '@type': 'PostalAddress', addressLocality: 'Campinas', addressRegion: 'SP', addressCountry: 'BR' },
       areaServed: { '@type': 'City', name: 'Campinas' },
-      hasMenu: IFOOD,
+      hasMenu: `${SITE}/cardapio`,
+      potentialAction: { '@type': 'OrderAction', target: { '@type': 'EntryPoint', urlTemplate: IFOOD, actionPlatform: ['http://schema.org/DesktopWebPlatform', 'http://schema.org/MobileWebPlatform'] } },
       acceptsReservations: false,
       sameAs: ['https://www.instagram.com/hicks_br/', PINTEREST, IFOOD],
       openingHoursSpecification: [
@@ -365,18 +473,113 @@ for (const nome of ['historia', 'bastidores', 'central']) {
   let corpo = comPinterest(fe(links(caminhos(src.slice(src.indexOf('<body'))))), nome);
   const faltando = [...corpo.matchAll(/(?:src|href)="(assets\/[^"]+)"/g)].map(x => x[1]).filter(r => !fs.existsSync(path.join(ROOT, r)));
   if (faltando.length) throw new Error(`arquivo inexistente em ${nome}: ${faltando.join(', ')}`);
-  corpo = corpo.replace('</footer>', assinatura + '</footer>')
+  corpo = corpo.split('href="/portlink#lanches"').join('href="/cardapio"') // "Os lanches" leva ao cardápio completo
+    .replace('</footer>', SEO.RODAPE_LINKS + assinatura + '</footer>')
     .replace('</body>', '<script src="assets/js/scroll-motion.js" defer></script></body>');
-  fs.writeFileSync(path.join(ROOT, `${nome}.html`), conferirMasculino(head + corpo, `${nome}.html`));
+  // Dados estruturados: página do site, ligada ao restaurante, com a trilha Início › página.
+  const ldPagina = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'WebPage', '@id': `${url}#pagina`, url, name: titulo, description: desc, inLanguage: 'pt-BR', isPartOf: { '@id': `${SITE}/#site` }, about: { '@id': `${HOME}#restaurante` }, breadcrumb: { '@id': `${url}#trilha` } },
+    { '@type': 'BreadcrumbList', '@id': `${url}#trilha`, itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: HOME },
+      { '@type': 'ListItem', position: 2, name: titulo.replace(/ — .*$/, '') },
+    ] },
+  ] };
+  const headLd = head.replace('</head>', `<script type="application/ld+json">${JSON.stringify(ldPagina).replace(/</g, '\\u003c')}</script></head>`);
+  fs.writeFileSync(path.join(ROOT, `${nome}.html`), conferirMasculino(headLd + corpo, `${nome}.html`));
   paginas.push(nome);
 }
+
+// 5b) Páginas de SEO: uma por burger, os guias de decisão e o cardápio completo em texto.
+// Cabeçalho, rodapé e barra do celular vêm da página História já montada (mesma identidade).
+const historiaHtml = fs.readFileSync(path.join(ROOT, 'historia.html'), 'utf8');
+const pedaco = re => { const m = historiaHtml.match(re); if (!m) throw new Error('pedaço da página História não encontrado: ' + re); return m[0]; };
+const botaoIfood = `<div class="access-actions"><a class="ch ch-ifood" href="${IFOOD}" target="_blank" rel="noopener noreferrer"><span class="ch-tag">Super Restaurante</span><img class="ch-brand" src="/assets/img/logo-ifood.jpg" alt="iFood" width="172" height="148"><span class="ch-label">peça pelo iFood</span></a></div>`;
+// Nomes curtos do cardápio (ex.: "Combo Baba-Yaga"), do mapa "names" do mobile-catalog.js.
+const NOMES_CURTOS = JSON.parse(/const names = (\{[^}]*\})/.exec(scripts['assets/js/mobile-catalog.js'])[1].replace(/(\d+):'([^']*)'/g, '"$1":"$2"'));
+// Imagens de topo dos guias e do cardápio: fonte/imagens/<slug>.jpg|png|webp (geradas à parte, ilustrativas).
+const IMAGENS = path.join(FONTE, 'imagens');
+const imagensGuias = new Map();
+if (fs.existsSync(IMAGENS)) for (const f of fs.readdirSync(IMAGENS)) {
+  const m = /^([a-z0-9-]+)\.(jpe?g|png|webp)$/i.exec(f);
+  if (m && (m[1] === 'cardapio' || SEO.GUIAS.some(g => g.slug === m[1]))) imagensGuias.set(m[1], path.join(IMAGENS, f));
+}
+const paginasSeo = SEO.gerarPaginas({
+  SITE, HOME, IFOOD, catalogo: lerCatalogo(page), meses: MESES_SUPER, mesAno: MES_ANO,
+  nomesCurtos: NOMES_CURTOS, imagensGuias: new Set(imagensGuias.keys()),
+  cabeca, header: pedaco(/<header class="header"[\s\S]*?<\/header>/), footer: pedaco(/<footer[\s\S]*?<\/footer>/),
+  mobileOrder: pedaco(/<div class="mobile-order">[\s\S]*?<\/div>/), botaoIfood, absolutizar,
+});
+fs.rmSync(path.join(ROOT, 'burgers'), { recursive: true, force: true });
+for (const g of SEO.GUIAS) fs.rmSync(path.join(ROOT, `${g.slug}.html`), { force: true });
+// Endereços antigos dos guias (renomeados em 19/10/2026, nunca publicados).
+for (const velho of ['hamburguer-angus', 'horarios-e-entrega']) fs.rmSync(path.join(ROOT, `${velho}.html`), { force: true });
+for (const p of paginasSeo) {
+  const html = conferirMasculino(fe0(p.html), p.rel);
+  const faltando = [...html.matchAll(/(?:src|href)="\/((?:assets|burgers)\/[^"#?]+)"/g)].map(x => x[1])
+    .filter(r => !r.startsWith('assets/burgers/') && !r.startsWith('assets/guias/') && !/^assets\/cardapio\/\d+-(160|480|800)\.webp$/.test(r) &&!fs.existsSync(path.join(ROOT, r)) && !fs.existsSync(path.join(ROOT, r + '.html')) && !paginasSeo.some(q => q.rel === r + '.html'));
+  if (faltando.length) throw new Error(`link ou arquivo inexistente em ${p.rel}: ${[...new Set(faltando)].join(', ')}`);
+  salvar(p.rel, html);
+}
+// Mapa do site (com as fotos dos burgers) e regras para robôs: tudo liberado, inclusive os das IAs.
 const hoje = new Date().toISOString().slice(0, 10);
+const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const entradas = [
+  { url: HOME, prio: '1.0' },
+  ...paginasSeo.filter(p => p.rel === 'cardapio.html').map(p => ({ url: p.url, prio: '0.9' })),
+  ...paginasSeo.filter(p => p.rel.startsWith('burgers/')).map(p => ({ url: p.url, prio: '0.8', imagem: p.imagem })),
+  ...paginasSeo.filter(p => !p.rel.startsWith('burgers/') && p.rel !== 'cardapio.html').map(p => ({ url: p.url, prio: '0.7' })),
+  ...paginas.map(p => ({ url: `${SITE}/${p}`, prio: '0.5' })),
+];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${['portlink', ...paginas].map(p => `  <url><loc>${SITE}/${p}</loc><lastmod>${hoje}</lastmod><priority>${p === 'portlink' ? '1.0' : '0.6'}</priority></url>`).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${entradas.map(e => `  <url><loc>${e.url}</loc><lastmod>${hoje}</lastmod><priority>${e.prio}</priority>${e.imagem ? `<image:image><image:loc>${e.imagem.loc}</image:loc><image:title>${xml(e.imagem.titulo)}</image:title><image:caption>${xml(e.imagem.legenda)}</image:caption></image:image>` : ''}</url>`).join('\n')}
 </urlset>
 `);
-fs.writeFileSync(path.join(ROOT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync(path.join(ROOT, 'robots.txt'), `User-agent: *
+Allow: /
+
+# Buscadores de IA também são bem-vindos (o Hicks quer ser citado nas respostas).
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
+`);
+
+// llms.txt: resumo do Hicks escrito para IAs (ChatGPT, Perplexity, Claude), com os fatos e os endereços certos.
+const { NUTRI } = require('./nutricao.cjs');
+const kcalTxt = b => NUTRI[b.id] ? ` ${NUTRI[b.id].kcal.toLocaleString('pt-BR')} kcal e ${NUTRI[b.id].n.prot[0]} de proteínas por lanche (${NUTRI[b.id].porcao.replace(/^1 lanche \((.*)\)$/, '$1')}).` : '';
+fs.writeFileSync(path.join(ROOT, 'llms.txt'), `# Hick’s Burger (o Hicks)
+
+> Hamburgueria em Campinas (SP), só delivery. Burgers autorais de carne Angus e de frango crocante no pão brioche. Pedidos exclusivamente pelo iFood, de quarta a segunda, das 18h às 23h (terça fechado). Super Restaurante iFood há ${MESES_SUPER} meses seguidos (contagem de ${MES_ANO}).
+
+## Fatos
+- Nome: Hick’s Burger, chamado de "o Hicks". CNPJ 36.635.421/0001-36.
+- Cidade: Campinas, SP. Base de delivery na Vila Boa Vista. Não há consumo nem retirada no local.
+- Como pedir: iFood (${IFOOD}). A área de entrega aparece no iFood ao informar o endereço.
+- Horário: quarta a segunda, 18h às 23h, inclusive domingo e segunda. Terça-feira fechado.
+- Informação nutricional completa de cada burger, fornecida pelo Hicks, na página de cada lanche.
+- Reconhecimentos: Super Restaurante iFood (${MESES_SUPER} meses seguidos em ${MES_ANO}), placa de 12 meses consecutivos 2024–2025, Prêmio Hambúrguer Perfeito (Top 10 Campinas), Padrão e Constância 365 Dias, selo Angus Brasil, Brazil Beef Quality.
+- Mais vendidos: Duplo Aversa (campeão de vendas), Aversa, O Clássico e Baba-Yaga. Único apimentado: Tex-Mex.
+- Instagram: https://www.instagram.com/hicks_br/ · Pinterest: ${PINTEREST}
+
+## Páginas principais
+- [Página principal](${HOME}): a marca, os destaques e as perguntas frequentes.
+- [Cardápio completo](${SITE}/cardapio): todos os burgers, combos, acompanhamentos, bebidas e sobremesa.
+${SEO.GUIAS.map(g => `- [${g.h1.replace(/\.$/, '')}](${SITE}/${g.slug}): ${g.descricao}`).join('\n')}
+
+## Burgers
+${SEO.BURGERS.map(b => `- [${b.nome}](${SITE}/burgers/${b.slug}): ${b.resposta}${kcalTxt(b)}`).join('\n')}
+`);
 
 // 6) Velocidade: recomprime as fotos (o export vem pesado) e gera as versões menores do cardápio.
 // Qualidade conferida lado a lado com o original: sem diferença visível.
@@ -390,6 +593,11 @@ const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modu
     const rel = `assets/cardapio/${f}`;
     for (const w of [...LARGURAS, 160]) await recomprimir(rel, { quality: 76 }, w, rel.replace('.webp', `-${w}.webp`));
     await recomprimir(rel, { quality: 76 });
+  }
+  // Fotos dos burgers com nome legível (o Google também lê o nome do arquivo): /assets/burgers/baba-yaga.webp.
+  fs.mkdirSync(path.join(ROOT, 'assets/burgers'), { recursive: true });
+  for (const b of SEO.BURGERS) for (const suf of ['', '-480', '-800']) {
+    fs.copyFileSync(path.join(ROOT, `assets/cardapio/${b.id}${suf}.webp`), path.join(ROOT, `assets/burgers/${b.slug}${suf}.webp`));
   }
   for (const f of fs.readdirSync(path.join(ROOT, 'assets/img/selos'))) await recomprimir(`assets/img/selos/${f}`, { quality: 80, alphaQuality: 90 });
   // Foto da cozinha (Bastidores): recomprimida no mesmo formato e nome que a página usa.
@@ -438,5 +646,33 @@ const sharp = require(path.join(ROOT, '..', '..', 'Portlink', 'site', 'node_modu
       { input: monograma, left: 70, top: 92 }, { input: frase, left: 70, top: 222 },
     ])
     .jpeg({ quality: 86, mozjpeg: true }).toFile(path.join(ROOT, 'og.jpg'));
+
+  // Uma imagem de compartilhamento por burger (WhatsApp e redes mostram o lanche certo).
+  fs.rmSync(path.join(ROOT, 'og'), { recursive: true, force: true });
+  fs.mkdirSync(path.join(ROOT, 'og'), { recursive: true });
+  const degrade = Buffer.from('<svg width="180" height="630" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g"><stop offset="0" stop-color="#101010"/><stop offset="1" stop-color="#101010" stop-opacity="0"/></linearGradient></defs><rect width="180" height="630" fill="url(#g)"/></svg>');
+  const xmlEsc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  for (const b of SEO.BURGERS) {
+    const foto = await sharp(path.join(ROOT, `assets/cardapio/${b.id}.webp`)).resize(630, 630).toBuffer();
+    const nome = b.nome.toUpperCase();
+    const tam = Math.min(84, Math.floor(540 / (nome.length * 0.47)));
+    const texto = Buffer.from(`<svg width="560" height="330" xmlns="http://www.w3.org/2000/svg">
+<text x="0" y="${tam}" fill="#f4f1e9" ${fonte} font-weight="700" font-size="${tam}">${xmlEsc(nome)}</text>
+<text x="2" y="${tam + 52}" fill="#aaa8a1" ${fonte} font-weight="400" font-size="32">${xmlEsc(b.sub)}</text>
+<text x="2" y="${tam + 120}" fill="#8c8981" ${fonte} font-weight="400" font-size="24">Hick’s Burger · Hamburgueria em Campinas</text>
+</svg>`);
+    await sharp({ create: { width: 1200, height: 630, channels: 3, background: '#101010' } })
+      .composite([{ input: foto, left: 570, top: 0 }, { input: degrade, left: 570, top: 0 }, { input: monograma, left: 70, top: 92 }, { input: texto, left: 70, top: 250 }])
+      .jpeg({ quality: 84, mozjpeg: true }).toFile(path.join(ROOT, `og/${b.slug}.jpg`));
+  }
+  // Imagens dos guias (quando existirem em fonte/imagens/): topo da página (1600 e 800 px) e compartilhamento.
+  if (imagensGuias.size) fs.mkdirSync(path.join(ROOT, 'assets/guias'), { recursive: true });
+  for (const [slug, arq] of imagensGuias) {
+    const buf = fs.readFileSync(arq);
+    await sharp(buf).resize(1600, 1000, { fit: 'cover' }).webp({ quality: 78, effort: 6 }).toFile(path.join(ROOT, `assets/guias/${slug}.webp`));
+    await sharp(buf).resize(800, 500, { fit: 'cover' }).webp({ quality: 76, effort: 6 }).toFile(path.join(ROOT, `assets/guias/${slug}-800.webp`));
+    await sharp(buf).resize(1200, 630, { fit: 'cover' }).jpeg({ quality: 84, mozjpeg: true }).toFile(path.join(ROOT, `og/${slug}.jpg`));
+  }
+  console.log(`páginas de SEO: ${paginasSeo.length} · imagens de compartilhamento: ${SEO.BURGERS.length + 1 + imagensGuias.size} · imagens de guia: ${imagensGuias.size}`);
 })();
 console.log(`portlink.html ${(Buffer.byteLength(page) / 1024).toFixed(0)} KB · ${Object.keys(mapa).length} arquivos do bundle reconhecidos · páginas: ${paginas.join(', ')}`);

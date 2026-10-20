@@ -40,11 +40,12 @@
   }
 
   // Selos: carrossel horizontal com CTA em variações (?seal=pontos|setas|arraste|progresso)
-  const track = document.querySelector('.seal-stack');
+  const track = document.querySelector('.seal-stack:not(.sw-on)') && !document.querySelector('script[src*="seal-wheel"]') ? document.querySelector('.seal-stack') : null;
   if (track) {
     const mode = (new URLSearchParams(location.search).get('seal') || 'pontos').toLowerCase();
     const cards = [...track.querySelectorAll('.seal-card')];
     const n = cards.length, pad = v => String(v).padStart(2, '0');
+    const padL = () => parseFloat(getComputedStyle(track).paddingLeft) || 0;
     const go = i => { i = Math.max(0, Math.min(n - 1, i)); const c = cards[i]; track.scrollTo({ left: c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); };
     let cur = 0;
     const ctl = document.createElement('div'); ctl.className = 'seal-ctl seal-ctl-' + mode;
@@ -73,10 +74,10 @@
       ctl.addEventListener('click', () => go(cur + 1 >= n ? 0 : cur + 1));
     }
     const INFO = [
-      HK_MONTHS + ' meses seguidos como Super Restaurante iFood.',
+      HK_MONTHS + ' meses seguidos como <a class="si-link" href="super-restaurante-ifood.html">Super Restaurante iFood <span>↗︎</span></a> <em class="si-more">E contando…</em>',
+      'Carne Angus com origem certificada.',
       'Entre os 10 melhores burgers de Campinas.',
       'O mesmo padrão, todos os dias do ano.',
-      'Carne Angus com origem certificada.',
       'Carne bovina de qualidade verificada.'
     ];
     const info = document.createElement('p'); info.className = 'seal-info'; info.setAttribute('aria-live', 'polite');
@@ -86,8 +87,8 @@
     const setInfo = i => { if (i === infoI) return; infoI = i; info.classList.add('sw'); setTimeout(() => { info.innerHTML = INFO[i] || ''; info.classList.remove('sw'); }, infoI === i && info.textContent ? 160 : 0); };
     let tk = false;
     const upd = () => { tk = false; const mid = track.scrollLeft + track.clientWidth / 2; let best = 0, bd = 1e9;
-      cards.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = i; }
-        const t = Math.min(d / c.offsetWidth, 1); c.style.transform = 'scale(' + (1 - t * .22).toFixed(3) + ')'; c.style.opacity = (1 - t * .55).toFixed(3); });
+      cards.forEach((c, i) => { const sd = c.offsetLeft + c.offsetWidth / 2 - mid, d = Math.abs(sd); if (d < bd) { bd = d; best = i; }
+        const t = Math.min(d / c.offsetWidth, 1), far = Math.min(d / c.offsetWidth, 2); c.style.transform = 'translateX(' + (-Math.sign(sd) * t * 62).toFixed(1) + 'px) scale(' + (1 - t * .3).toFixed(3) + ')'; c.style.zIndex = String(10 - Math.round(far * 3)); c.style.opacity = (far > 1.5 ? Math.max(0, 1 - (far - 1) * 2) * .45 : 1 - t * .55).toFixed(3); c.style.filter = 'brightness(' + (1 - t * .35).toFixed(3) + ')'; const cap = c.querySelector('.seal-cap'); if (cap) cap.style.opacity = Math.max(0, 1 - t * 1.6).toFixed(3); });
       cur = best; setInfo(best);
       if (dotsEl) [...dotsEl.children].forEach((b, i) => b.classList.toggle('on', i === best));
       if (countEl) countEl.innerHTML = mode === 'pontos' || !['setas','arraste','progresso'].includes(mode) ? (best + 1) + ' de ' + n + ' <span class="sc-sep">·</span> ' + (best === n - 1 ? 'voltar ←' : 'deslize →') : '<b>' + pad(best + 1) + '</b> / ' + pad(n);

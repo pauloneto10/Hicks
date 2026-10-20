@@ -1,4 +1,18 @@
 User-agent: *
 Allow: /
 
+# Buscadores de IA também são bem-vindos (o Hicks quer ser citado nas respostas).
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://hicksburger.com.br/sitemap.xml

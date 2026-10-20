@@ -52,3 +52,23 @@
 
 ## Rodada 10 — 19/10/2026
 - Botão do Pinterest (br.pinterest.com/hicks_br) ao lado do Instagram no topo das quatro páginas, no mesmo estilo. Perfil incluído nos dados para o Google (sameAs).
+
+## Rodada 11 — 19/10/2026 (SEO e GEO; montada no localhost, NÃO publicada)
+- 13 páginas de burger (/burgers/<nome>), 5 guias (/hamburguer-angus, /hamburguer-de-frango-crocante, /qual-hamburguer-escolher, /super-restaurante-ifood, /horarios-e-entrega) e o cardápio em texto (/cardapio). Conteúdo em ferramentas/conteudo-seo.cjs, moldes em ferramentas/paginas-seo.cjs.
+- Página principal: seção "Conheça cada burger" (carrossel no celular, 7×2 no desktop) e menu suspenso da tabela nutricional.
+- Rodapé "Explore" em todas as páginas; "Os lanches" das páginas internas leva ao cardápio.
+- Dados estruturados: WebSite, Restaurant (cardápio em /cardapio, ação de pedido no iFood), MenuItem, Menu, ItemList, BreadcrumbList, FAQPage, ImageObject.
+- /portlink como endereço oficial com redirecionamento permanente (308); hicks-burger.vercel.app → hicksburger.com.br.
+- llms.txt, robots.txt com buscadores de IA liberados, sitemap com fotos, uma imagem de compartilhamento por burger.
+- Servidor local: node ferramentas/servidor-local.cjs → http://localhost:4400/portlink
+- Ajustes da revisão (19/10/2026, local): tabela nutricional no carrossel "Qual vai ser hoje?" (antes de "Ver lanche", acompanha o lanche escolhido); cardápio refeito em cartões com foto e abas fixas; sem o "CADA BURGER, EM DETALHE"; "Explore o Hicks" como botão que abre os links. Imagens de topo dos guias entram sozinhas quando salvas em ../fonte/imagens/<slug>.jpg.
+- 19/10/2026 (local, não publicado): tabela nutricional real do Hicks (ferramentas/nutricao.cjs) em cada página de burger, no carrossel "Qual vai ser hoje?", na ficha "Ver lanche", no cardápio e no llms.txt; saem as estimativas do design. Guias reescritos no tom da mensagem ao cliente: /melhor-hamburguer-de-campinas (novo), /melhor-angus-de-campinas, /hamburgueria-autoral-campinas (novo), /qual-hamburguer-escolher ("Burgers que expressam sua personalidade"), /super-restaurante-ifood, /hamburgueria-aberta-a-noite-campinas, /hamburguer-de-frango-crocante. Guias sem botão do iFood no topo (pedido só no fim). 25 páginas no mapa do site.
+
+## Rodada 12 — 20/10/2026 (design final + SEO e GEO, publicada)
+- Site refeito a partir das páginas prontas do Claude Design (fonte/design/), montadas por ferramentas/montar-design.cjs.
+- 19 páginas: /portlink, /cardapio, 13 burgers em /burgers/<lanche> e 4 guias (melhor hambúrguer de Campinas, melhor Angus, burger autoral, Super Restaurante iFood).
+- Títulos e descrições novos em todas as páginas, com nome do lanche + "Campinas" + burger autoral / hamburgueria / hambúrguer artesanal (ferramentas/seo-paginas.cjs).
+- Dados estruturados refeitos a partir do texto visível de cada página (FAQ, cardápio, lanche com tabela nutricional, trilha de navegação).
+- Rodapé "Explore o Hicks" de volta (os guias tinham ficado sem links internos; "Melhor hambúrguer de Campinas" não recebia nenhum).
+- Scripts das páginas movidos para arquivos (a política de segurança bloqueava scripts dentro do HTML).
+- História, Bastidores e Central saíram: redirecionamento permanente para /hamburgueria-autoral-campinas, /portlink#cozinha e /portlink#acesso.

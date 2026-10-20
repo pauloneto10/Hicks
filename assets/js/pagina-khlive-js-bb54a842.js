@@ -1,0 +1,1 @@
+(function(){var k=document.querySelector('#cozinha .kitchen-head');if(!k)return;if(!('IntersectionObserver' in window)){k.classList.add('kh-on');return}var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){k.classList.add('kh-on');io.disconnect()}})},{threshold:.35});io.observe(k)})();

@@ -3,9 +3,20 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "hicks-burger.vercel.app"
+        }
+      ],
+      "destination": "https://hicksburger.com.br/:path*",
+      "permanent": true
+    },
+    {
       "source": "/",
       "destination": "/portlink",
-      "permanent": false
+      "permanent": true
     },
     {
       "source": "/index",
@@ -15,6 +26,51 @@
     {
       "source": "/index.html",
       "destination": "/portlink",
+      "permanent": true
+    },
+    {
+      "source": "/historia",
+      "destination": "/hamburgueria-autoral-campinas",
+      "permanent": true
+    },
+    {
+      "source": "/bastidores",
+      "destination": "/portlink#cozinha",
+      "permanent": true
+    },
+    {
+      "source": "/central",
+      "destination": "/portlink#acesso",
+      "permanent": true
+    },
+    {
+      "source": "/qual-hamburguer-escolher",
+      "destination": "/cardapio",
+      "permanent": true
+    },
+    {
+      "source": "/hamburguer-de-frango-crocante",
+      "destination": "/cardapio",
+      "permanent": true
+    },
+    {
+      "source": "/hamburgueria-aberta-a-noite-campinas",
+      "destination": "/portlink#acesso",
+      "permanent": true
+    },
+    {
+      "source": "/hamburguer-angus",
+      "destination": "/melhor-angus-de-campinas",
+      "permanent": true
+    },
+    {
+      "source": "/horarios-e-entrega",
+      "destination": "/portlink#acesso",
+      "permanent": true
+    },
+    {
+      "source": "/burgers",
+      "destination": "/cardapio",
       "permanent": true
     }
   ],
@@ -29,11 +85,20 @@
       ]
     },
     {
-      "source": "/assets/(img|cardapio|fonts|video)/(.*)",
+      "source": "/assets/(img|cardapio|burgers|fonts|video)/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/og/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
         }
       ]
     },
