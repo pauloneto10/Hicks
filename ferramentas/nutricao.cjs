@@ -20,7 +20,7 @@ const NUTRI = {
   2108708: { porcao: '1 lanche (aprox. 176 g)', aprox: false, kcal: 523, kcalVD: '26%', n: {
     carb: ['30,7 g', '10%'], acTot: ['4,6 g', '**'], acAd: ['3,6 g', '7%'], prot: ['26,0 g', '52%'], gord: ['32,3 g', '50%'],
     sat: ['11,3 g', '57%'], trans: ['0,03 g', ''], fibra: ['1,0 g', '4%'], sodio: ['775 mg', '39%'] } },
-  // O Clássico (enviado como "Cheese Bacon — Brie")
+  // O Clássico (enviado como "Cheese Bacon — Brie"; o queijo é cheddar, confirmado pelo Hicks em 20/10/2026)
   2108699: { porcao: '1 lanche (aprox. 221 g)', aprox: false, kcal: 772, kcalVD: '39%', n: {
     carb: ['32,6 g', '11%'], acTot: ['4,8 g', '**'], acAd: ['3,8 g', '8%'], prot: ['28,6 g', '57%'], gord: ['58,0 g', '89%'],
     sat: ['16,7 g', '84%'], trans: ['0,15 g', '8%'], fibra: ['1,0 g', '4%'], sodio: ['1.073 mg', '54%'] } },
@@ -78,7 +78,7 @@ const NUTRI = {
   1292565: { porcao: '100 g (pronto para consumo)', aprox: false, ref: true, kcal: 263, kcalVD: '13%', n: {
     carb: ['34,1 g', '11%'], acTot: ['6,1 g', '**'], acAd: ['0 g', '0%'], prot: ['4,1 g', '8%'], gord: ['11,9 g', '18%'],
     sat: ['1,8 g', '9%'], trans: ['0 g', '0%'], fibra: ['1,5 g', '6%'], sodio: ['192 mg', '10%'] } },
-  // Nuggets (enviado como "Nuggets Chicken Supreme — Seara")
+  // Nuggets (enviado como "Nuggets Chicken Supreme — Seara"; os nuggets são Seara, confirmado em 20/10/2026)
   1292563: { porcao: '200 g', aprox: false, ref: true, kcal: 350, kcalVD: '18%', n: {
     carb: ['20 g', '7%'], prot: ['26 g', '52%'], gord: ['18,6 g', '29%'] } },
   // Almofadinha de Gouda (enviado como "Crispy de Queijo Gouda — McCain")

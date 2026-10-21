@@ -78,6 +78,16 @@ for (const peso of [300, 700]) {
   const alvo = path.join(ROOT, 'assets', 'fonts', `poppins-${peso}-portlink.woff2`);
   if (!fs.existsSync(alvo)) fs.copyFileSync(path.join(__dirname, 'recursos', `poppins-${peso}-portlink.woff2`), alvo);
 }
+// Correções de conteúdo confirmadas pelo Hicks e aplicadas em todo o site (páginas e scripts do design).
+// 20/10/2026: os nuggets são Seara, não artesanais.
+const CORRECOES = [[/Nuggets Artesanais/g, 'Nuggets Seara']];
+const corrigir = s => CORRECOES.reduce((t, [de, para]) => t.replace(de, para), s);
+for (const dir of [path.join(ROOT, 'assets', 'js')]) {
+  for (const f of fs.readdirSync(dir).filter(n => n.endsWith('.js'))) {
+    const arq = path.join(dir, f), antes = fs.readFileSync(arq, 'utf8'), depois = corrigir(antes);
+    if (depois !== antes) fs.writeFileSync(arq, depois);
+  }
+}
 const scriptsExtraidos = new Map(); // nome do arquivo → código
 
 // ---------------------------------------------------------------------------------------------
@@ -124,7 +134,7 @@ const avisos = [];
 for (const { origem, rota } of paginas) {
   const seo = PAGINAS[rota];
   const url = rota === 'portlink' ? HOME : `${SITE}/${rota}`;
-  let h = fs.readFileSync(path.join(DESIGN, origem), 'utf8');
+  let h = corrigir(fs.readFileSync(path.join(DESIGN, origem), 'utf8'));
 
   // 5.1 Scripts de dentro da página → arquivo próprio (mesmo lugar, mesma ordem, mesmo efeito).
   h = h.replace(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g, (tag, attrs = '', codigo) => {

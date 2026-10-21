@@ -79,3 +79,7 @@
 - Se a Apple trocar o endereço de uma prévia, o player busca o novo no iTunes (uma vez por música) e, se não achar, pula para a próxima; para depois de 3 falhas seguidas.
 - CSP liberada só para o necessário: áudio de https://audio-ssl.itunes.apple.com e busca em https://itunes.apple.com. Script de fora continua bloqueado.
 - Rótulo "ESCOLHA AQUI O SEU PEDIDO" (seção "Qual vai ser hoje?") com o mesmo tamanho dos outros rótulos, como "CONHEÇA CADA BURGER MAIS A FUNDO" (estava com 14 px; os outros têm 9 px). A regra do design que aumenta o texto de apoio da seção pegava o rótulo junto; corrigido no montador.
+
+## Rodada 12.3 — 20/10/2026 (confirmações do Hicks)
+- Nuggets: "Nuggets Artesanais" virou "Nuggets Seara" no cardápio, no catálogo do celular e nos dados estruturados (o Hicks confirmou que são Seara). A troca fica no montador (lista CORRECOES), então vale também para as próximas versões do design.
+- O Clássico: o queijo é cheddar, confirmado pelo Hicks. O texto do site já dizia cheddar; a tabela nutricional segue a enviada pelo Hicks como "Cheese Bacon — Brie".
