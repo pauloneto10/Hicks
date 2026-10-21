@@ -73,3 +73,9 @@
 - Scripts das páginas movidos para arquivos (a política de segurança bloqueava scripts dentro do HTML).
 - História, Bastidores e Central saíram: redirecionamento permanente para /hamburgueria-autoral-campinas, /portlink#cozinha e /portlink#acesso.
 - 20/10/2026: ícone do Spotify no topo das páginas passa a abrir a playlist do Hicks (https://open.spotify.com/playlist/5bKJJZ1BPGHgVfaiMxymSI); antes abria a página inicial do Spotify.
+
+## Rodada 12.2 — 20/10/2026 (playlist e rótulo)
+- Playlist da página principal voltou a tocar. O player do design buscava cada música por um script da Apple, e a política de segurança do site (CSP) bloqueava esse script e o áudio: nada tocava. Agora cada música da lista já leva o endereço da prévia de 30 s do iTunes, gravado na montagem (ferramentas/buscar-previas.cjs → ferramentas/recursos/previas-musica.json, 25 de 25 conferidas por nome, artista e versão). O toque toca na hora, inclusive no iPhone, e o site não chama a Apple antes de a pessoa escolher uma música.
+- Se a Apple trocar o endereço de uma prévia, o player busca o novo no iTunes (uma vez por música) e, se não achar, pula para a próxima; para depois de 3 falhas seguidas.
+- CSP liberada só para o necessário: áudio de https://audio-ssl.itunes.apple.com e busca em https://itunes.apple.com. Script de fora continua bloqueado.
+- Rótulo "ESCOLHA AQUI O SEU PEDIDO" (seção "Qual vai ser hoje?") com o mesmo tamanho dos outros rótulos, como "CONHEÇA CADA BURGER MAIS A FUNDO" (estava com 14 px; os outros têm 9 px). A regra do design que aumenta o texto de apoio da seção pegava o rótulo junto; corrigido no montador.

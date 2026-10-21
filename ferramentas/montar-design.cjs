@@ -30,8 +30,13 @@ const agora = new Date();
 const MESES = 46 + (agora.getFullYear() - 2026) * 12 + (agora.getMonth() - 9);
 const MES_ANO = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 const HOJE = agora.toISOString().slice(0, 10);
+// Playlist da página principal: player próprio e prévias de 30 s do iTunes (ver 5.2c).
+const PLAYER = fs.readFileSync(path.join(__dirname, 'recursos', 'player-playlist.js'), 'utf8');
+const ARQ_PREVIAS = path.join(__dirname, 'recursos', 'previas-musica.json');
+const PREVIAS = fs.existsSync(ARQ_PREVIAS) ? JSON.parse(fs.readFileSync(ARQ_PREVIAS, 'utf8')) : {};
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const decod = s => String(s).replace(/&amp;/g, '&').replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"');
 const txt = s => String(s).replace(/<img[^>]*alt="([^"]*)"[^>]*>/g, ' $1 ').replace(/<(script|style|svg|table)[\s\S]*?<\/\1>/g, ' ')
   .replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
   .replace(/[＋+]\s*$/, '').replace(/\s+([.,;:!?…])/g, '$1').replace(/\s+/g, ' ').trim();
@@ -129,6 +134,8 @@ for (const { origem, rota } of paginas) {
     if (tipo && tipo !== 'text/javascript' && tipo !== 'module') return tag; // dados (application/json)
     if (!codigo.trim()) return '';
     const id = (attrs.match(/\bid="([^"]*)"/) || [])[1] || 'inline';
+    // O player da playlist (sp-js) é trocado pela versão do montador (ver 5.2c).
+    if (id === 'sp-js') codigo = PLAYER;
     const hash = crypto.createHash('md5').update(codigo).digest('hex').slice(0, 8);
     const nome = `pagina-${id}-${hash}.js`;
     scriptsExtraidos.set(nome, codigo);
@@ -144,6 +151,25 @@ for (const { origem, rota } of paginas) {
   // 5.2b Ícone do Spotify no topo: o design apontava para a página inicial do Spotify; vai para a playlist do Hicks
   //      (link enviado pelo Neto em 20/10/2026, sem os parâmetros de rastreio).
   h = h.split('href="https://open.spotify.com/"').join(`href="${SPOTIFY}"`).split('aria-label="Spotify do Hicks"').join('aria-label="Playlist do Hicks no Spotify"');
+
+  // 5.2c Playlist da página principal: o player do design buscava cada música por um script da Apple, que a
+  //      política de segurança bloqueia, e nada tocava. Agora cada botão leva o endereço da prévia de 30 s
+  //      (ferramentas/recursos/previas-musica.json, gerado por buscar-previas.cjs) e o player é o do montador.
+  if (h.includes('class="sp-q"')) {
+    for (const cl of ['sp-audio', 'sp-btn', 'sp-bar', 'sp-t0', 'sp-t1', 'sp-title', 'sp-back', 'sp-fwd', 'sp-float']) {
+      if (!h.includes(cl)) avisos.push(`${rota}: o player da playlist mudou no design (falta .${cl}); conferir recursos/player-playlist.js`);
+    }
+    if (!/<script[^>]*id="sp-js"/.test(fs.readFileSync(path.join(DESIGN, origem), 'utf8'))) avisos.push(`${rota}: script sp-js não encontrado; o player do montador não entrou`);
+    h = h.replace(/(<button type="button" data-i="\d+")(><b>([^<]*)<\/b><span>([^<]*)<\/span>)/g, (m, ini, fim, titulo, artistas) => {
+      const previa = PREVIAS[`${decod(titulo)} | ${decod(artistas)}`];
+      if (!previa) { avisos.push(`${rota}: "${decod(titulo)}" sem prévia gravada (rodar node ferramentas/buscar-previas.cjs)`); return m; }
+      return `${ini} data-src="${esc(previa.url)}"${fim}`;
+    });
+  }
+
+  // 5.2d Correções de estilo do design. A regra que aumenta o texto de apoio da seção "Qual vai ser hoje?"
+  //      pegava também o rótulo "Escolha aqui o seu pedido" (14 px, contra 9 px dos outros rótulos).
+  h = h.split('.next .section-heading p,').join('.next .section-heading p:not(.eyebrow),');
 
   // 5.3 Cabeçalho de SEO: sai o que veio do design, entra o padrão do montador.
   h = h.replace(/<title>[\s\S]*?<\/title>/g, '')
