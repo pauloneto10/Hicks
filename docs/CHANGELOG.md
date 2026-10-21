@@ -83,3 +83,8 @@
 ## Rodada 12.3 — 20/10/2026 (confirmações do Hicks)
 - Nuggets: "Nuggets Artesanais" virou "Nuggets Seara" no cardápio, no catálogo do celular e nos dados estruturados (o Hicks confirmou que são Seara). A troca fica no montador (lista CORRECOES), então vale também para as próximas versões do design.
 - O Clássico: o queijo é cheddar, confirmado pelo Hicks. O texto do site já dizia cheddar; a tabela nutricional segue a enviada pelo Hicks como "Cheese Bacon — Brie".
+
+## Rodada 12.4 — 20/10/2026 (Baba-Yaga sem frango e perfil do Spotify)
+- Baba-Yaga: o lanche não leva frango (confirmado pelo Hicks). "Angus + Chicken & Catupiry" virou "Angus + Catupiry" (como o selo do lanche já dizia) no subtítulo, nas legendas e textos alternativos das fotos, no combo ("Combo Angus + Catupiry"), no catálogo e nos dados estruturados. Fica na lista CORRECOES do montador.
+- A tabela nutricional do Baba-Yaga continua a enviada pelo Hicks com o nome "Angus + Chicken & Catupiry" (510 g, 1.445 kcal): pendente de confirmação, porque pode incluir o frango.
+- Perfil do Hicks no Spotify (https://open.spotify.com/user/314u5busxogors2o3bqnvdkhifee, dono da playlist) na lista de perfis oficiais da marca nos dados estruturados (sameAs) e no llms.txt. O ícone do topo continua abrindo a playlist.

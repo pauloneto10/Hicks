@@ -26,6 +26,9 @@ const IFOOD = 'https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-
 const PINTEREST = 'https://br.pinterest.com/hicks_br/';
 const INSTAGRAM = 'https://www.instagram.com/hicks_br/';
 const SPOTIFY = 'https://open.spotify.com/playlist/5bKJJZ1BPGHgVfaiMxymSI';
+// Perfil do Hicks no Spotify (dono da playlist; confirmado pelo Neto em 20/10/2026). Entra na lista de perfis da
+// marca (sameAs) e no llms.txt; o ícone do topo continua abrindo a playlist.
+const SPOTIFY_PERFIL = 'https://open.spotify.com/user/314u5busxogors2o3bqnvdkhifee';
 const agora = new Date();
 const MESES = 46 + (agora.getFullYear() - 2026) * 12 + (agora.getMonth() - 9);
 const MES_ANO = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -79,8 +82,12 @@ for (const peso of [300, 700]) {
   if (!fs.existsSync(alvo)) fs.copyFileSync(path.join(__dirname, 'recursos', `poppins-${peso}-portlink.woff2`), alvo);
 }
 // Correções de conteúdo confirmadas pelo Hicks e aplicadas em todo o site (páginas e scripts do design).
-// 20/10/2026: os nuggets são Seara, não artesanais.
-const CORRECOES = [[/Nuggets Artesanais/g, 'Nuggets Seara']];
+// 20/10/2026: os nuggets são Seara, não artesanais; o Baba-Yaga não leva frango ("Angus + Chicken & Catupiry"
+// vira "Angus + Catupiry", como o selo do lanche já dizia).
+const CORRECOES = [
+  [/Nuggets Artesanais/g, 'Nuggets Seara'],
+  [/(Angus) \+ Chicken (?:&amp;|&) (Catupiry)/gi, '$1 + $2'],
+];
 const corrigir = s => CORRECOES.reduce((t, [de, para]) => t.replace(de, para), s);
 for (const dir of [path.join(ROOT, 'assets', 'js')]) {
   for (const f of fs.readdirSync(dir).filter(n => n.endsWith('.js'))) {
@@ -231,7 +238,7 @@ for (const { origem, rota } of paginas) {
         taxID: '36.635.421/0001-36', address: { '@type': 'PostalAddress', addressLocality: 'Campinas', addressRegion: 'SP', addressCountry: 'BR' },
         areaServed: { '@type': 'City', name: 'Campinas' }, hasMenu: `${SITE}/cardapio`, acceptsReservations: false,
         potentialAction: { '@type': 'OrderAction', target: { '@type': 'EntryPoint', urlTemplate: IFOOD, actionPlatform: ['http://schema.org/DesktopWebPlatform', 'http://schema.org/MobileWebPlatform'] } },
-        sameAs: [INSTAGRAM, PINTEREST, IFOOD],
+        sameAs: [INSTAGRAM, PINTEREST, SPOTIFY_PERFIL, IFOOD],
         openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday'], opens: '18:00', closes: '23:00' }],
         award: ['Super Restaurante iFood', 'Prêmio Hambúrguer Perfeito, Top 10 Campinas'],
       },
@@ -355,7 +362,7 @@ fs.writeFileSync(path.join(ROOT, 'llms.txt'), `# Hick’s Burger (o Hicks)
 - Reconhecimentos: Super Restaurante iFood (${MESES} meses seguidos em ${MES_ANO}), placa de 12 meses consecutivos 2024–2025, Prêmio Hambúrguer Perfeito (Top 10 Campinas), Padrão e Constância 365 Dias, selo Angus Brasil, Brazil Beef Quality.
 - Mais vendidos: Duplo Aversa (campeão de vendas), Aversa, O Clássico e Baba-Yaga. Único apimentado: Tex-Mex.
 - Informação nutricional completa de cada burger, fornecida pelo Hicks, na página de cada lanche.
-- Instagram: ${INSTAGRAM} · Pinterest: ${PINTEREST}
+- Instagram: ${INSTAGRAM} · Pinterest: ${PINTEREST} · Spotify: ${SPOTIFY_PERFIL} (playlist: ${SPOTIFY})
 
 ## Páginas
 ${ordem.filter(r => r.seo.tipo !== 'burger').map(r => `- [${r.h1.replace(/\.$/, '')}](${r.url}): ${subst(r.seo.descricao)}`).join('\n')}

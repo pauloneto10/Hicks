@@ -1,7 +1,7 @@
 const menuUrl='https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1';
 const products=[
 {id:2108706,no:'01',name:'Duplo Aversa',sub:'Duplo Angus + Cheese Crocante',price:'49,90',img:'burger-02.jpg',tags:['angus'],badge:'CAMPEÃO DE VENDAS',desc:'Dois burgers Angus de 100 g, cheddar, muçarela empanada de 100 g, bacon, maionese temperada, tomate e alface.'},
-{id:2108707,no:'02',name:'Baba-Yaga',sub:'Angus + Chicken & Catupiry',price:'59,00',img:'burger-01.jpg',tags:['angus'],badge:'ANGUS + CATUPIRY',desc:'Angus de 100 g, muçarela empanada de 100 g, Catupiry, bacon, maionese mista, tomate, cebola roxa e alface.'},
+{id:2108707,no:'02',name:'Baba-Yaga',sub:'Angus + Catupiry',price:'59,00',img:'burger-01.jpg',tags:['angus'],badge:'ANGUS + CATUPIRY',desc:'Angus de 100 g, muçarela empanada de 100 g, Catupiry, bacon, maionese mista, tomate, cebola roxa e alface.'},
 {id:2108699,no:'03',name:'O Clássico',sub:'Cheese Bacon Angus',price:'36,90',img:'burger-08.jpg',tags:['angus'],desc:'Angus de 100 g, cheddar, bacon Seara Gourmet e maionese defumada no pão brioche.'},
 {id:2108690,no:'04',name:'Tex-Mex',sub:'Jalapeño & Bacon Angus',price:'39,00',img:'burger-05.jpg',tags:['angus','spicy'],badge:'APIMENTADO',desc:'Angus de 100 g, cheddar, bacon, jalapeño, cebola roxa, alface e maionese de sriracha. Para quem gosta de picância.'},
 {id:4854487,no:'05',name:'Aversa',sub:'Angus + Muçarela Crocante & Bacon',price:'45,00',img:'burger-03.jpg',tags:['angus'],desc:'Angus de 100 g, cheddar, muçarela empanada de 100 g, bacon, maionese temperada, tomate e alface.'},
