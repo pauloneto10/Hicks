@@ -109,6 +109,30 @@ for (const dir of [path.join(ROOT, 'assets', 'js')]) {
     if (depois !== antes) fs.writeFileSync(arq, depois);
   }
 }
+// Vídeo da cozinha (20/10/2026). O design só liberava o vídeo depois que a página inteira carregava, não tinha
+// capa e não tentava de novo se o celular bloqueasse o play; e a abertura (intro.js) mandava a página de volta
+// ao topo quando o carregamento terminava, tirando da seção quem já tinha rolado até ela.
+const avisosApoio = [];
+const remendar = (arq, de, para, motivo) => {
+  const f = path.join(ROOT, 'assets', 'js', arq);
+  if (!fs.existsSync(f)) return avisosApoio.push(`${arq} não veio no design (${motivo})`);
+  const s = fs.readFileSync(f, 'utf8');
+  if (!de.test(s)) return avisosApoio.push(`${arq}: trecho não encontrado, conferir (${motivo})`);
+  fs.writeFileSync(f, s.replace(de, para));
+};
+remendar('scroll-motion.js',
+  /[ \t]*const lazyVid = document\.querySelector\('\.kitchen-video\[data-src\]'\);[\s\S]*?addEventListener\('load', arm, \{ once: true \}\);\s*\}\n/,
+  () => fs.readFileSync(path.join(__dirname, 'recursos', 'video-cozinha.js'), 'utf8'), 'vídeo da cozinha');
+remendar('intro.js', /addEventListener\('load', \(\) => scrollTo\(0, 0\), \{ once: true \}\);/,
+  "addEventListener('load', () => { if (document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); }, { once: true });", 'volta ao topo no fim do carregamento');
+remendar('intro.js', /addEventListener\('pageshow', \(\) => scrollTo\(0, 0\)\);/,
+  "addEventListener('pageshow', e => { if (e.persisted || document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); });", 'volta ao topo no fim do carregamento');
+// Capa de cada vídeo (quadro do próprio vídeo, em ferramentas/recursos/<vídeo>-capa.webp).
+for (const f of fs.existsSync(path.join(ROOT, 'assets', 'video')) ? fs.readdirSync(path.join(ROOT, 'assets', 'video')).filter(n => n.endsWith('.mp4')) : []) {
+  const capa = path.join(__dirname, 'recursos', f.replace(/\.mp4$/, '-capa.webp'));
+  if (fs.existsSync(capa)) fs.copyFileSync(capa, path.join(ROOT, 'assets', 'video', path.basename(capa)));
+  else avisosApoio.push(`vídeo ${f} sem capa em ferramentas/recursos/${path.basename(capa)}`);
+}
 const scriptsExtraidos = new Map(); // nome do arquivo → código
 
 // ---------------------------------------------------------------------------------------------
@@ -151,7 +175,7 @@ const lerPagina = h => {
 // ---------------------------------------------------------------------------------------------
 // 5) Montagem de cada página.
 const resultado = [];
-const avisos = [];
+const avisos = [...avisosApoio];
 for (const { origem, rota } of paginas) {
   const seo = PAGINAS[rota];
   const url = rota === 'portlink' ? HOME : `${SITE}/${rota}`;
@@ -197,6 +221,10 @@ for (const { origem, rota } of paginas) {
       return `${ini} data-src="${esc(previa.url)}"${fim}`;
     });
   }
+
+  // 5.2c2 Capa do vídeo: vai em data-poster e só é baixada quando a seção chega perto (recursos/video-cozinha.js).
+  h = h.replace(/(<video\b[^>]*\bdata-src="\/assets\/video\/([^"]+)\.mp4")/g, (m, ini, nome) =>
+    fs.existsSync(path.join(ROOT, 'assets', 'video', `${nome}-capa.webp`)) ? `${ini} data-poster="/assets/video/${nome}-capa.webp"` : m);
 
   // 5.2d Correções de estilo do design. A regra que aumenta o texto de apoio da seção "Qual vai ser hoje?"
   //      pegava também o rótulo "Escolha aqui o seu pedido" (14 px, contra 9 px dos outros rótulos).

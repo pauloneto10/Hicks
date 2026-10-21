@@ -2,8 +2,8 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   scrollTo(0, 0);
-  addEventListener('load', () => scrollTo(0, 0), { once: true });
-  addEventListener('pageshow', () => scrollTo(0, 0));
+  addEventListener('load', () => { if (document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); }, { once: true });
+  addEventListener('pageshow', e => { if (e.persisted || document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); });
   const el = document.getElementById('hk-intro');
   if (!el) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.remove(); return; }
