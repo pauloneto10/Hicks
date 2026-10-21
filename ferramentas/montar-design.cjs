@@ -40,6 +40,20 @@ const PREVIAS = fs.existsSync(ARQ_PREVIAS) ? JSON.parse(fs.readFileSync(ARQ_PREV
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const decod = s => String(s).replace(/&amp;/g, '&').replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"');
+// Textos vizinhos que o design escreve colados ("<b>Duplo Aversa</b><span>Duplo Angus…</span>") ganham um espaço
+// entre eles. Na tela nada muda (medido no navegador: estão em blocos ou caixas flex/grid, onde o espaço some),
+// mas quem lê sem o visual (IAs, modo Leitor do Safari, leitor de tela) deixa de ver "Duplo AversaDuplo Angus".
+// Ficam de fora a assinatura (port+link, que é uma palavra só) e o carimbo decorativo do topo.
+const TAGS_TEXTO = 'span|b|i|em|strong|small|a|div|p|li|ul|ol|dl|dt|dd|h[1-6]|figure|figcaption|label|button|article|header|footer|section|nav|time';
+const COLADOS = new RegExp(`([^\\s<>])((?:</(?:${TAGS_TEXTO})>)+)((?:<(?:${TAGS_TEXTO})\\b[^>]*>)+)(?=[^\\s<])`, 'g');
+function separarColados(h) {
+  const guardados = [];
+  const guarda = m => `\u0000${guardados.push(m) - 1}\u0000`;
+  h = h.replace(/<(script|style|textarea|pre)\b[\s\S]*?<\/\1>/g, guarda)
+    .replace(/<span class="portlink-word">[\s\S]*?<\/span><\/span>/g, guarda)
+    .replace(/<div class="orbit-stamp"[\s\S]*?<\/div>/g, guarda);
+  return h.replace(COLADOS, '$1$2 $3').replace(/\u0000(\d+)\u0000/g, (m, i) => guardados[i]);
+}
 const txt = s => String(s).replace(/<img[^>]*alt="([^"]*)"[^>]*>/g, ' $1 ').replace(/<(script|style|svg|table)[\s\S]*?<\/\1>/g, ' ')
   .replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
   .replace(/[＋+]\s*$/, '').replace(/\s+([.,;:!?…])/g, '$1').replace(/\s+/g, ' ').trim();
@@ -283,6 +297,8 @@ for (const { origem, rota } of paginas) {
     );
   }
   h = h.replace('</head>', `${ld({ '@context': 'https://schema.org', '@graph': grafo })}</head>`);
+
+  h = separarColados(h);
 
   // 5.6 Conferências.
   for (const n of (seo.descricao.match(/\b(Baba-Yaga|Duplo Aversa|Aversa|Montevidéu|Tex-Mex|Vila Nova|Kentucky|Elite|Chicken Salad|Cheese Salada|Cheese Burger|Quarterão|O Clássico|Shake Shack|Méqui|jalapeño|sriracha|Catupiry|alho frito|onion rings|Top 10)\b/g) || [])) {
