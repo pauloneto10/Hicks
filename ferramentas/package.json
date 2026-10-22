@@ -1,0 +1,8 @@
+{
+  "name": "hicks-ferramentas",
+  "private": true,
+  "description": "Ferramentas de montagem do site do Hicks (não vão para o ar: a pasta ferramentas está no .vercelignore).",
+  "dependencies": {
+    "sharp": "0.35.5"
+  }
+}

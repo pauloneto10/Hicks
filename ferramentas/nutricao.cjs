@@ -52,7 +52,7 @@ const NUTRI = {
   4854487: { porcao: '1 lanche (aprox. 355 g)', aprox: true, kcal: 1220, kcalVD: '61%', n: {
     carb: ['52,3 g', '17%'], acTot: ['5,1 g', '**'], acAd: ['3,8 g', '8%'], prot: ['42,0 g', '84%'], gord: ['87,0 g', '134%'],
     sat: ['28,4 g', '142%'], trans: ['≥ 0,8 g', '≥ 40%'], fibra: ['2,2 g', '9%'], sodio: ['1.250 mg', '63%'] } },
-  // Baba-Yaga (enviado como "Angus + Chicken & Catupiry", 510 g; em 20/10/2026 o Hicks confirmou que o lanche não leva frango)
+  // Baba-Yaga (enviado como "Angus + Chicken & Catupiry", 510 g). Leva frango: Chicken Supreme no lugar de uma das muçarelas (confirmado em 22/10/2026)
   2108707: { porcao: '1 lanche (aprox. 510 g)', aprox: true, kcal: 1445, kcalVD: '72%', n: {
     carb: ['70,7 g', '24%'], acTot: ['5,5 g', '**'], acAd: ['4,2 g', '8%'], prot: ['59,3 g', '119%'], gord: ['103,9 g', '160%'],
     sat: ['32,7 g', '164%'], trans: ['≥ 1,1 g', '≥ 55%'], fibra: ['5,5 g', '22%'], sodio: ['1.943 mg', '97%'] } },

@@ -108,3 +108,9 @@
 - Logo branca do iFood do botão do topo gerada da logo vermelha (o export não trouxe o arquivo).
 - Dados estruturados do restaurante: coordenadas (geo), link do mapa (hasMap) e área de entrega como círculo de 15 km (GeoCircle), lidos do próprio design. llms.txt com a área de entrega.
 - Testado no servidor local: sem erros de segurança, mapa com círculo e crédito, tela cheia, aviso de horário, música, vídeo (bloqueado e falha de rede) e rastreio de SEO das 19 páginas sem problemas.
+
+## Rodada 13.1 — 22/10/2026 (Baba-Yaga com frango e fotos recomprimidas)
+- Baba-Yaga: o lanche leva frango. No lugar de uma das duas muçarelas empanadas que o design descrevia entra o burger de frango Chicken Supreme de 100 g (nome usado pelo Hicks no iFood). Corrigido na página do lanche (texto, camada "Chicken Supreme e muçarela empanada", quadro de pesos 100 g Angus · 100 g Chicken Supreme · 100 g muçarela empanada, pergunta frequente), no guia de burger autoral, no catálogo e nos dados estruturados. O nome volta a ser "Angus + Chicken & Catupiry", como no iFood (a rodada 12.4 tinha tirado o "Chicken" por engano). A tabela nutricional enviada (510 g, 1.445 kcal) já era a da versão com frango e segue igual.
+- Fotos: o export do design trazia as versões -480 e -800 como cópias idênticas da foto de 1100 px (90 a 200 KB cada), então o celular baixava a foto inteira mesmo mostrando pequena. Novo ferramentas/otimizar-fotos.cjs (chamado pelo montador, com cache em ferramentas/.cache-fotos): gera cada versão no tamanho do nome e recomprime as fotos e os selos. 178 fotos: 23,3 MB → 6,7 MB. Ex.: duplo-aversa-480 de 188 KB para 21 KB; selo Top 10 de 199 KB para 53 KB. Comparadas lado a lado com as originais, sem diferença visível.
+- Página principal no 4G simulado: fim do carregamento de 12,6 s para 5,6 s; 3,3 MB para 2,3 MB (já contando o mapa novo).
+- Ferramentas ganharam package.json próprio (sharp), fora do site publicado.

@@ -121,13 +121,31 @@ for (const peso of [300, 700]) {
   if (!fs.existsSync(alvo)) fs.copyFileSync(path.join(__dirname, 'recursos', `poppins-${peso}-portlink.woff2`), alvo);
 }
 // Correções de conteúdo confirmadas pelo Hicks e aplicadas em todo o site (páginas e scripts do design).
-// 20/10/2026: os nuggets são Seara, não artesanais; o Baba-Yaga não leva frango ("Angus + Chicken & Catupiry"
-// vira "Angus + Catupiry", como o selo do lanche já dizia).
+// 20/10/2026: os nuggets são Seara, não artesanais.
+// 22/10/2026: o Baba-Yaga leva frango. No lugar de uma das duas muçarelas empanadas que o design descrevia vai
+// o burger de frango Chicken Supreme de 100 g (nome usado pelo próprio Hicks no iFood); o nome do lanche segue
+// "Angus + Chicken & Catupiry", como no iFood. A tabela nutricional enviada já era a da versão com frango.
 const CORRECOES = [
   [/Nuggets Artesanais/g, 'Nuggets Seara'],
-  [/(Angus) \+ Chicken (?:&amp;|&) (Catupiry)/gi, '$1 + $2'],
+  [/<b>2 fatias de muçarela empanada<\/b><span>Duas fatias de muçarela empanada, crocantes por fora e derretidas por dentro\.<\/span>/g,
+    '<b>Chicken Supreme e muçarela empanada</b><span>Um burger de frango Chicken Supreme de 100 g e uma muçarela empanada de 100 g, crocante por fora e derretida por dentro.</span>'],
+  [/Duas fatias de muçarela empanada e Catupiry/g, 'Chicken Supreme, muçarela empanada e Catupiry'],
+  [/duas fatias de muçarela empanada/g, 'Chicken Supreme de 100 g, muçarela empanada'],
+  [/(Baba-Yaga[^<]{0,80}?Angus de 100 g, )(100 g de muçarela empanada)/g, '$1Chicken Supreme de 100 g, $2'],
+  [/Hambúrguer Angus 100g, muçarela empanada 100g, catupiry/g, 'Hambúrguer Angus 100g, Chicken Supreme 100g, muçarela empanada 100g, catupiry'],
+  [/(name:'Baba-Yaga'[^}]*desc:'Angus de 100 g, )(muçarela empanada de 100 g)/g, '$1Chicken Supreme de 100 g, $2'],
+  [/Angus, muçarela empanada (&amp;|&) Catupiry/g, 'Angus + Chicken $1 Catupiry'],
+  [/Angus, muçarela empanada, Catupiry e bacon/g, 'Angus, Chicken Supreme, muçarela empanada, Catupiry e bacon'],
 ];
 const corrigir = s => CORRECOES.reduce((t, [de, para]) => t.replace(de, para), s);
+// Correções que valem só numa página (o mesmo trecho está certo em outra; ex.: Angus + muçarela no Aversa).
+const CORRECOES_PAGINA = {
+  'burger-baba-yaga.html': [
+    [/ganha duas fatias de <mark>muçarela empanada<\/mark>/g, 'ganha o Chicken Supreme de 100 g e uma <mark>muçarela empanada</mark>'],
+    [/<li><b>100 g<\/b><span>Angus<\/span><\/li><li><b>100 g<\/b><span>muçarela empanada<\/span><\/li>/g,
+      '<li><b>100 g</b><span>Angus</span></li><li><b>100 g</b><span>Chicken Supreme</span></li><li><b>100 g</b><span>muçarela empanada</span></li>'],
+  ],
+};
 for (const dir of [path.join(ROOT, 'assets', 'js')]) {
   for (const f of fs.readdirSync(dir).filter(n => n.endsWith('.js'))) {
     const arq = path.join(dir, f), antes = fs.readFileSync(arq, 'utf8'), depois = corrigir(antes);
@@ -162,6 +180,8 @@ for (const f of fs.existsSync(path.join(ROOT, 'assets', 'video')) ? fs.readdirSy
   if (fs.existsSync(capa)) fs.copyFileSync(capa, path.join(ROOT, 'assets', 'video', path.basename(capa)));
   else avisosApoio.push(`vídeo ${f} sem capa em ferramentas/recursos/${path.basename(capa)}`);
 }
+// Fotos: recomprime e gera de verdade as versões de 480 e 800 px (o export traz cópias da foto de 1100 px).
+require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'otimizar-fotos.cjs')], { stdio: 'inherit' });
 const scriptsExtraidos = new Map(); // nome do arquivo → código
 
 // ---------------------------------------------------------------------------------------------
@@ -209,6 +229,10 @@ for (const { origem, rota } of paginas) {
   const seo = PAGINAS[rota];
   const url = rota === 'portlink' ? HOME : `${SITE}/${rota}`;
   let h = corrigir(fs.readFileSync(path.join(DESIGN, origem), 'utf8'));
+  for (const [de, para] of CORRECOES_PAGINA[origem] || []) {
+    if (!de.test(h)) avisos.push(`${rota}: correção específica não encontrada (${de.source.slice(0, 40)}…); conferir CORRECOES_PAGINA`);
+    h = h.replace(de, para);
+  }
 
   // 5.1 Scripts de dentro da página → arquivo próprio (mesmo lugar, mesma ordem, mesmo efeito).
   h = h.replace(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g, (tag, attrs = '', codigo) => {
@@ -371,6 +395,7 @@ for (const { origem, rota } of paginas) {
   if (/(?:^|[^\wÀ-ÿ])(?:a|da|na|pela|à)\s+(?:Hick[’']?s|<img class="hk-word")/i.test(v.visivel)) avisos.push(`${rota}: marca no feminino`);
   if (/segue o bulldog/i.test(v.visivel)) throw new Error(`${rota}: "Segue o Bulldog" voltou`);
   if (/estimativa|estimad[ao]s?\b/i.test(v.visivel)) avisos.push(`${rota}: texto com "estimativa"`);
+  if (/(duas|2) fatias de (<[^>]+>)*muçarela/i.test(h)) avisos.push(`${rota}: Baba-Yaga com "duas fatias de muçarela" (leva frango no lugar de uma); conferir CORRECOES`);
   if ((h.match(/<h1[\s>]/g) || []).length !== 1) avisos.push(`${rota}: ${(h.match(/<h1[\s>]/g) || []).length} h1`);
   if (/\son[a-z]+="/i.test(h.slice(h.indexOf('<body')))) avisos.push(`${rota}: atributo on...="" (bloqueado pela política de segurança)`);
 

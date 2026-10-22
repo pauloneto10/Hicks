@@ -22,7 +22,7 @@
 
 ## Burgers
 - [Aversa](https://hicksburger.com.br/burgers/aversa): São 9 camadas: Angus de 100 g, 100 g de muçarela empanada crocante, cheddar, bacon Seara Gourmet, tomate, alface americana e a maionese temperada da casa, no pão brioche. 1.220 kcal e 42,0 g de proteínas por lanche.
-- [Baba-Yaga](https://hicksburger.com.br/burgers/baba-yaga): São 10 camadas: Angus de 100 g, duas fatias de muçarela empanada, Catupiry Original, bacon, tomate, cebola roxa, alface americana e a maionese mista da casa, no pão brioche. 1.445 kcal e 59,3 g de proteínas por lanche.
+- [Baba-Yaga](https://hicksburger.com.br/burgers/baba-yaga): São 10 camadas: Angus de 100 g, Chicken Supreme de 100 g, muçarela empanada, Catupiry Original, bacon, tomate, cebola roxa, alface americana e a maionese mista da casa, no pão brioche. 1.445 kcal e 59,3 g de proteínas por lanche.
 - [Cheese Burger](https://hicksburger.com.br/burgers/cheese-burger): São 4 camadas: burger de 100 g e queijo cheddar, no pão brioche. 523 kcal e 26,0 g de proteínas por lanche.
 - [Cheese Salada](https://hicksburger.com.br/burgers/cheese-salada): São 9 camadas: Angus de 100 g, cheddar, picles de pepino, cebola roxa, tomate, alface americana e a maionese defumada da casa, no pão brioche. 734 kcal e 26,7 g de proteínas por lanche.
 - [Chicken Salad](https://hicksburger.com.br/burgers/chicken-salad): São 7 camadas: burger de frango Chicken Supreme de 100 g, cheddar, alface americana, tomate e a maionese temperada da casa, no pão brioche. 636 kcal e 29,9 g de proteínas por lanche.

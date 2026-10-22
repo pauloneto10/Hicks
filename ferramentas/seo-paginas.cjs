@@ -48,8 +48,8 @@ const PAGINAS = {
   },
   // Páginas de burger: cada uma disputa a busca pelo nome do lanche e por "burger em Campinas".
   'burgers/baba-yaga': { tipo: 'burger', titulo: 'Baba-Yaga | Burger autoral em Campinas | Hick’s Burger',
-    descricao: 'Baba-Yaga, burger autoral do Hick’s em Campinas: Angus de 100 g, duas fatias de muçarela empanada, Catupiry Original e bacon no brioche. Peça no iFood.',
-    palavras: ['Baba-Yaga Hick’s', 'burger com Catupiry e bacon Campinas', 'burger autoral Campinas'] },
+    descricao: 'Baba-Yaga, burger autoral do Hick’s em Campinas: Angus e Chicken Supreme de 100 g, muçarela empanada, Catupiry Original e bacon no brioche. No iFood.',
+    palavras: ['Baba-Yaga Hick’s', 'burger de Angus e frango Campinas', 'burger com Catupiry e bacon Campinas', 'burger autoral Campinas'] },
   'burgers/duplo-aversa': { tipo: 'burger', titulo: 'Duplo Aversa | Hambúrguer duplo em Campinas | Hick’s',
     descricao: 'Duplo Aversa, campeão de vendas do Hick’s em Campinas: dois Angus de 100 g, muçarela empanada crocante, cheddar e bacon. Hambúrguer artesanal no iFood.',
     palavras: ['Duplo Aversa', 'hambúrguer duplo Campinas', 'hambúrguer artesanal Campinas'] },
