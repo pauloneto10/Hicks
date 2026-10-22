@@ -5,7 +5,7 @@
 ## Fatos
 - Nome: Hick’s Burger, chamado de "o Hicks". CNPJ 36.635.421/0001-36.
 - Cidade: Campinas, SP. Base de delivery na Vila Boa Vista. Não há consumo nem retirada no local.
-- Como pedir: iFood (https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1). A área de entrega aparece no iFood ao informar o endereço.
+- Como pedir: iFood (https://www.ifood.com.br/delivery/campinas-sp/hicks--burger-vila-boa-vista/4a2f1137-8a50-41d3-8a62-c63040e771f1). Área de entrega: raio de 15 km a partir da base na Vila Boa Vista (mapa: https://www.google.com/maps/place/Hick%E2%80%99s+Burger+-+Campinas/@-22.8897306,-47.1223038,15z/data=!4m6!3m5!1s0x94c8c7ab1f0f6acf:0xd353ea36a3f6b8f5!8m2!3d-22.8897306!4d-47.1223038!16s%2Fg%2F11j318wqrp); o iFood confirma ao informar o endereço.
 - Horário: quarta a segunda, das 18h às 23h, inclusive domingo e segunda. Terça-feira fechado.
 - Reconhecimentos: Super Restaurante iFood (46 meses seguidos em outubro de 2026), placa de 12 meses consecutivos 2024–2025, Prêmio Hambúrguer Perfeito (Top 10 Campinas), Padrão e Constância 365 Dias, selo Angus Brasil, Brazil Beef Quality.
 - Mais vendidos: Duplo Aversa (campeão de vendas), Aversa, O Clássico e Baba-Yaga. Único apimentado: Tex-Mex.

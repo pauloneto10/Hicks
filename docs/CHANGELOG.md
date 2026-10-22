@@ -99,3 +99,12 @@
 - Agora (recursos/video-cozinha.js, aplicado pelo montador em scroll-motion.js): o vídeo começa a baixar quando a seção chega perto da tela, sem esperar o resto; mostra uma capa (quadro do próprio vídeo, 15 KB, recursos/cozinha-2-capa.webp) enquanto carrega ou se não puder tocar; se o play for bloqueado, toca no primeiro toque na página; se a rede falhar, recarrega sozinho (até 2 vezes).
 - A abertura só volta ao topo enquanto ainda está na tela (intro.js).
 - Testado: 4G (começou a baixar na hora, tocou antes do fim do carregamento, página parada no lugar), play bloqueado (capa visível, tocou no primeiro toque) e falha de rede no primeiro download (recuperou em 1,7 s).
+
+## Rodada 13 — 21/10/2026 (página principal nova do Claude Design)
+- fonte/design/portlink.html trocado pela versão nova ("hicks portlink atualização.html"); a anterior ficou em fonte/historico/portlink-2026-10-20.html.
+- O que mudou no design: botão vermelho "ir para o iFood" no topo (com "Ver cardápio" ao lado); na região atendida, relógio com o horário de Brasília, aviso "Aberto agora / Fechado agora / Última chance / Perto de abrir" e mapa da área de entrega (raio de 15 km a partir da Vila Boa Vista, com "Abrir no Google Maps" e tela cheia); link "acesse a playlist no Spotify" abaixo do player.
+- Ajustes do montador para o mapa: a biblioteca Leaflet 1.9.4 passa a ser servida do próprio site (antes vinha do unpkg; arquivos conferidos pela assinatura publicada pelo Leaflet) e as imagens do mapa vêm do OpenStreetMap, com o crédito no canto (o design usava os servidores do Google sem chave, o que os termos do Google Maps proíbem). Política de segurança liberada só para tile.openstreetmap.org.
+- O mapa não prende a rolagem: com um dedo (ou a roda do mouse) a página continua rolando; pinça dá zoom; arrastar o mapa fica na tela cheia (⤢). Zoom (+/−) movido para a direita (cobria o "Abrir no Google Maps"). Corrigida uma linha clara no meio do mapa (o realce de bordas do Leaflet, plus-lighter, com as margens fracionadas do design).
+- Logo branca do iFood do botão do topo gerada da logo vermelha (o export não trouxe o arquivo).
+- Dados estruturados do restaurante: coordenadas (geo), link do mapa (hasMap) e área de entrega como círculo de 15 km (GeoCircle), lidos do próprio design. llms.txt com a área de entrega.
+- Testado no servidor local: sem erros de segurança, mapa com círculo e crédito, tela cheia, aviso de horário, música, vídeo (bloqueado e falha de rede) e rastreio de SEO das 19 páginas sem problemas.

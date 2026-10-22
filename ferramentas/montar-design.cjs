@@ -37,6 +37,31 @@ const HOJE = agora.toISOString().slice(0, 10);
 const PLAYER = fs.readFileSync(path.join(__dirname, 'recursos', 'player-playlist.js'), 'utf8');
 const ARQ_PREVIAS = path.join(__dirname, 'recursos', 'previas-musica.json');
 const PREVIAS = fs.existsSync(ARQ_PREVIAS) ? JSON.parse(fs.readFileSync(ARQ_PREVIAS, 'utf8')) : {};
+// Mapa da área de entrega (design de 21/10/2026): ponto, raio e link do Google Maps lidos do próprio design,
+// para os dados estruturados e o llms.txt dizerem o mesmo que a página.
+const MAPA = (() => {
+  const h = fs.readFileSync(path.join(__dirname, '..', '..', 'fonte', 'design', 'portlink.html'), 'utf8');
+  const p = h.match(/loja=\[(-?\d+\.\d+),\s*(-?\d+\.\d+)\]/), r = h.match(/L\.circle\(loja,\{radius:(\d+)/), g = h.match(/class="rg5-gm" href="([^"]+)"/);
+  return p && r ? { lat: +p[1], lng: +p[2], raio: +r[1], link: g ? g[1].replace(/&amp;/g, '&') : null } : null;
+})();
+// O mapa do design buscava a biblioteca Leaflet no unpkg e as imagens nos servidores do Google sem chave
+// (proibido pelos termos do Google Maps). Agora: Leaflet 1.9.4 servido do próprio site (conferido pela assinatura
+// publicada pelo Leaflet) e imagens do OpenStreetMap, com o crédito exigido. E o mapa não prende a rolagem: com o
+// dedo (ou a roda do mouse) a página continua rolando; para arrastar o mapa, a tela cheia (⤢).
+function remendarMapa(codigo, rota) {
+  const trocas = [
+    [/https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.(css|js)/g, '/assets/vendor/leaflet/leaflet.$1', 'endereço do Leaflet 1.9.4'],
+    [/L\.tileLayer\(\s*'[^']*google\.com[^']*'\s*,\s*\{[^}]*\}\s*\)/, `L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'})`, 'imagens do mapa'],
+    [/scrollWheelZoom:true,dragging:true/, "scrollWheelZoom:false,dragging:!matchMedia('(pointer: coarse)').matches", 'gestos do mapa'],
+    [/var on=el\.classList\.toggle\('full'\);/, "var on=el.classList.toggle('full');if(on){m.dragging.enable();m.scrollWheelZoom.enable()}else{m.scrollWheelZoom.disable();if(matchMedia('(pointer: coarse)').matches)m.dragging.disable()}", 'tela cheia do mapa'],
+  ];
+  for (const [de, para, nome] of trocas) {
+    if (!de.test(codigo)) { avisos.push(`${rota}: mapa mudou no design (${nome}); conferir remendarMapa`); continue; }
+    codigo = codigo.replace(de, para);
+  }
+  if (/unpkg\.com|google\.com\/vt/.test(codigo)) avisos.push(`${rota}: o mapa ainda chama servidor de fora (unpkg/Google); a política de segurança vai bloquear`);
+  return codigo;
+}
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const decod = s => String(s).replace(/&amp;/g, '&').replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"');
@@ -127,6 +152,10 @@ remendar('intro.js', /addEventListener\('load', \(\) => scrollTo\(0, 0\), \{ onc
   "addEventListener('load', () => { if (document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); }, { once: true });", 'volta ao topo no fim do carregamento');
 remendar('intro.js', /addEventListener\('pageshow', \(\) => scrollTo\(0, 0\)\);/,
   "addEventListener('pageshow', e => { if (e.persisted || document.documentElement.classList.contains('hki-lock')) scrollTo(0, 0); });", 'volta ao topo no fim do carregamento');
+// Biblioteca do mapa (Leaflet 1.9.4) servida do próprio site, e a logo branca do iFood do botão do topo
+// (o design usa e o export não trouxe; gerada da logo vermelha).
+fs.cpSync(path.join(__dirname, 'recursos', 'leaflet'), path.join(ROOT, 'assets', 'vendor', 'leaflet'), { recursive: true });
+if (!fs.existsSync(path.join(ROOT, 'assets', 'img', 'logo-ifood-white.png'))) fs.copyFileSync(path.join(__dirname, 'recursos', 'logo-ifood-white.png'), path.join(ROOT, 'assets', 'img', 'logo-ifood-white.png'));
 // Capa de cada vídeo (quadro do próprio vídeo, em ferramentas/recursos/<vídeo>-capa.webp).
 for (const f of fs.existsSync(path.join(ROOT, 'assets', 'video')) ? fs.readdirSync(path.join(ROOT, 'assets', 'video')).filter(n => n.endsWith('.mp4')) : []) {
   const capa = path.join(__dirname, 'recursos', f.replace(/\.mp4$/, '-capa.webp'));
@@ -191,6 +220,7 @@ for (const { origem, rota } of paginas) {
     const id = (attrs.match(/\bid="([^"]*)"/) || [])[1] || 'inline';
     // O player da playlist (sp-js) é trocado pela versão do montador (ver 5.2c).
     if (id === 'sp-js') codigo = PLAYER;
+    if (id === 'rgmap-js') codigo = remendarMapa(codigo, rota);
     const hash = crypto.createHash('md5').update(codigo).digest('hex').slice(0, 8);
     const nome = `pagina-${id}-${hash}.js`;
     scriptsExtraidos.set(nome, codigo);
@@ -229,6 +259,10 @@ for (const { origem, rota } of paginas) {
   // 5.2d Correções de estilo do design. A regra que aumenta o texto de apoio da seção "Qual vai ser hoje?"
   //      pegava também o rótulo "Escolha aqui o seu pedido" (14 px, contra 9 px dos outros rótulos).
   h = h.split('.next .section-heading p,').join('.next .section-heading p:not(.eyebrow),');
+  // Mapa da área de entrega: o zoom (+/−) ficava por cima do "Abrir no Google Maps" e vai para a direita; e as
+  // imagens do mapa se sobrepõem meio pixel, sem a soma de brilho que o Leaflet usa nas bordas (plus-lighter):
+  // com as margens fracionadas do design, essa soma deixava uma linha clara no meio do mapa.
+  if (h.includes('id="mapa-entrega"')) h = h.replace('</head>', '<style id="mapa-montador">.sx-regiao.rg5 .rg5-map .leaflet-top.leaflet-left{left:auto;right:0}.rg5-map img.leaflet-tile{mix-blend-mode:normal!important;width:256.5px!important;height:256.5px!important}</style></head>');
 
   // 5.3 Cabeçalho de SEO: sai o que veio do design, entra o padrão do montador.
   h = h.replace(/<title>[\s\S]*?<\/title>/g, '')
@@ -278,7 +312,9 @@ for (const { origem, rota } of paginas) {
         description: 'Hamburgueria em Campinas, só delivery: burger autoral e hambúrguer artesanal de Angus e frango crocante no pão brioche. Super Restaurante iFood.',
         url: HOME, logo: `${SITE}/assets/img/hicks-word.png`, image: `${SITE}/og.jpg`, servesCuisine: ['Hambúrguer', 'Hambúrguer artesanal'],
         taxID: '36.635.421/0001-36', address: { '@type': 'PostalAddress', addressLocality: 'Campinas', addressRegion: 'SP', addressCountry: 'BR' },
-        areaServed: { '@type': 'City', name: 'Campinas' }, hasMenu: `${SITE}/cardapio`, acceptsReservations: false,
+        areaServed: MAPA ? [{ '@type': 'City', name: 'Campinas' }, { '@type': 'GeoCircle', geoMidpoint: { '@type': 'GeoCoordinates', latitude: MAPA.lat, longitude: MAPA.lng }, geoRadius: MAPA.raio }] : { '@type': 'City', name: 'Campinas' },
+        ...(MAPA ? { geo: { '@type': 'GeoCoordinates', latitude: MAPA.lat, longitude: MAPA.lng }, ...(MAPA.link ? { hasMap: MAPA.link } : {}) } : {}),
+        hasMenu: `${SITE}/cardapio`, acceptsReservations: false,
         potentialAction: { '@type': 'OrderAction', target: { '@type': 'EntryPoint', urlTemplate: IFOOD, actionPlatform: ['http://schema.org/DesktopWebPlatform', 'http://schema.org/MobileWebPlatform'] } },
         sameAs: [INSTAGRAM, PINTEREST, SPOTIFY_PERFIL, IFOOD],
         openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday'], opens: '18:00', closes: '23:00' }],
@@ -401,7 +437,7 @@ fs.writeFileSync(path.join(ROOT, 'llms.txt'), `# Hick’s Burger (o Hicks)
 ## Fatos
 - Nome: Hick’s Burger, chamado de "o Hicks". CNPJ 36.635.421/0001-36.
 - Cidade: Campinas, SP. Base de delivery na Vila Boa Vista. Não há consumo nem retirada no local.
-- Como pedir: iFood (${IFOOD}). A área de entrega aparece no iFood ao informar o endereço.
+- Como pedir: iFood (${IFOOD}). ${MAPA ? `Área de entrega: raio de ${MAPA.raio / 1000} km a partir da base na Vila Boa Vista${MAPA.link ? ` (mapa: ${MAPA.link})` : ''}; o iFood confirma ao informar o endereço.` : 'A área de entrega aparece no iFood ao informar o endereço.'}
 - Horário: quarta a segunda, das 18h às 23h, inclusive domingo e segunda. Terça-feira fechado.
 - Reconhecimentos: Super Restaurante iFood (${MESES} meses seguidos em ${MES_ANO}), placa de 12 meses consecutivos 2024–2025, Prêmio Hambúrguer Perfeito (Top 10 Campinas), Padrão e Constância 365 Dias, selo Angus Brasil, Brazil Beef Quality.
 - Mais vendidos: Duplo Aversa (campeão de vendas), Aversa, O Clássico e Baba-Yaga. Único apimentado: Tex-Mex.
