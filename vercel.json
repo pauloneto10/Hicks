@@ -140,15 +140,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/googlec9a13095ae4bea13",
-      "destination": "/google-verificacao.txt"
-    },
-    {
-      "source": "/googlec9a13095ae4bea13.html",
-      "destination": "/google-verificacao.txt"
-    }
   ]
 }

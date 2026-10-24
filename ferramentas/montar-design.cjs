@@ -296,7 +296,8 @@ for (const { origem, rota } of paginas) {
   const titulo = subst(seo.titulo), descricao = subst(seo.descricao);
   if (titulo.length > 62) avisos.push(`${rota}: título com ${titulo.length} caracteres`);
   if (descricao.length > 160) throw new Error(`${rota}: descrição com ${descricao.length} caracteres (máximo 160)`);
-  const cabecalho = `<title>${esc(titulo)}</title><meta name="description" content="${esc(descricao)}">` +
+  // Verificação do Google Search Console (meta tag enviada pelo Neto em 24/10/2026), em todas as páginas.
+  const cabecalho = `<title>${esc(titulo)}</title><meta name="google-site-verification" content="ps0_srzsha_JvTpqRwrEoT5bFJdgQapSzyIIOtyUALc"><meta name="description" content="${esc(descricao)}">` +
     `<meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="${url}">` +
     `<meta property="og:type" content="${seo.tipo === 'burger' ? 'article' : 'website'}"><meta property="og:site_name" content="Hick’s Burger">` +
     `<meta property="og:locale" content="pt_BR"><meta property="og:url" content="${url}"><meta property="og:title" content="${esc(titulo)}">` +
