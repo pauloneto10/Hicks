@@ -31,7 +31,10 @@ http.createServer((req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('404 — página não encontrada');
   }
   const cab = { 'Content-Type': TIPOS[path.extname(arq)] || 'application/octet-stream' };
-  for (const h of config.headers || []) if (padrao(h.source).test(p)) for (const { key, value } of h.headers) if (!(key in cab)) cab[key] = value;
+  // Condições "has"/"missing" por parâmetro do endereço (ex.: ?v=... das fotos versionadas → cache de um ano).
+  const condicao = h => (h.has || []).every(c => c.type !== 'query' || url.searchParams.has(c.key)) &&
+    (h.missing || []).every(c => c.type !== 'query' || !url.searchParams.has(c.key));
+  for (const h of config.headers || []) if (padrao(h.source).test(p) && condicao(h)) for (const { key, value } of h.headers) if (!(key in cab)) cab[key] = value;
   // No localhost não há HTTPS: sai o HSTS e o "upgrade-insecure-requests"; o resto da CSP vale, para pegar
   // qualquer script ou recurso que seria bloqueado no ar.
   delete cab['Strict-Transport-Security'];

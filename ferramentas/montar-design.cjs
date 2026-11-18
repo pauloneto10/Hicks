@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const { PAGINAS } = require('./seo-paginas.cjs');
 const { NUTRI } = require('./nutricao.cjs');
 const { BURGERS } = require('./conteudo-seo.cjs');
+const { VARIANTES } = require('./otimizar-fotos.cjs');
 // Rota de cada burger → id do item no cardápio (para a tabela nutricional nos dados estruturados).
 const ID_DO_BURGER = Object.fromEntries(BURGERS.map(b => [`burgers/${b.slug}`, b.id]));
 
@@ -50,7 +51,8 @@ const MAPA = (() => {
 // dedo (ou a roda do mouse) a página continua rolando; para arrastar o mapa, a tela cheia (⤢).
 function remendarMapa(codigo, rota) {
   const trocas = [
-    [/https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.(css|js)/g, '/assets/vendor/leaflet/leaflet.$1', 'endereço do Leaflet 1.9.4'],
+    // (com a versão no endereço, para o cache de um ano; ver versao())
+    [/https:\/\/unpkg\.com\/leaflet@1\.9\.4\/dist\/leaflet\.(css|js)/g, (m, ext) => `/assets/vendor/leaflet/leaflet.${ext}?v=${versao(`/assets/vendor/leaflet/leaflet.${ext}`)}`, 'endereço do Leaflet 1.9.4'],
     [/L\.tileLayer\(\s*'[^']*google\.com[^']*'\s*,\s*\{[^}]*\}\s*\)/, `L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'})`, 'imagens do mapa'],
     [/scrollWheelZoom:true,dragging:true/, "scrollWheelZoom:false,dragging:!matchMedia('(pointer: coarse)').matches", 'gestos do mapa'],
     [/var on=el\.classList\.toggle\('full'\);/, "var on=el.classList.toggle('full');if(on){m.dragging.enable();m.scrollWheelZoom.enable()}else{m.scrollWheelZoom.disable();if(matchMedia('(pointer: coarse)').matches)m.dragging.disable()}", 'tela cheia do mapa'],
@@ -183,6 +185,61 @@ for (const f of fs.existsSync(path.join(ROOT, 'assets', 'video')) ? fs.readdirSy
 // Fotos: recomprime e gera de verdade as versões de 480 e 800 px (o export traz cópias da foto de 1100 px).
 require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'otimizar-fotos.cjs')], { stdio: 'inherit' });
 const scriptsExtraidos = new Map(); // nome do arquivo → código
+// Scripts que ficam DENTRO da página (liberados na política de segurança pela impressão digital do código).
+const SCRIPTS_NA_PAGINA = new Set(['hk-mobile-cap']);
+const impressoes = new Set(); // 'sha256-...' de cada script que ficou na página
+
+// Catálogo da página principal (mobile-catalog.js): as fotos montadas pelo script passam a oferecer ao navegador
+// as versões de 240, 480 e 800 px (srcset), cada uma com o tamanho em que aparece (sizes). Antes iam sempre as de
+// 1100 px, mesmo nas miniaturas.
+remendar('mobile-catalog.js', /( const esc = value => [^\n]*\n)/,
+  "$1 const ss = (u, s) => { const p = catalog.find(x => x.image === u); return p && p.srcset ? ` srcset=\"${esc(p.srcset)}\" sizes=\"${s}\"` : ''; };\n", 'fotos do catálogo: função do srcset');
+for (const [de, sizes, nome] of [
+  [/src="\$\{esc\(p\.image\)\}"( alt="\$\{esc\(p\.name\)\} — foto)/, '(max-width: 650px) min(46vw, 200px), 430px', 'cartão do catálogo'],
+  [/(<span class="rv-thumbs">[^`]*`<img )src="\$\{esc\(p\.image\)\}"/, '(max-width: 650px) 40px, 112px', 'miniaturas das categorias'],
+  [/src="\$\{esc\(p\.image\)\}"( alt="\$\{esc\(p\.name\)\}" draggable="false")/, '(max-width: 650px) 240px, 430px', 'carrossel'],
+  [/src="\$\{esc\(p\.image\)\}"( alt="" loading="lazy" width="56")/, '56px', 'lista do menu'],
+  [/src="\$\{esc\(p\.image\)\}"( alt="\$\{esc\(p\.name\)\}"><div class="mobile-dialog-copy">)/, 'min(100vw, 430px)', 'foto do detalhe'],
+  [/src="\$\{esc\(cover\(g\)\)\}"/, '(max-width: 650px) 160px, 430px', 'capa das categorias'],
+]) {
+  const expr = nome === 'capa das categorias' ? 'cover(g)' : 'p.image';
+  const tag = `src="\${esc(${expr})}"\${ss(${expr}, '${sizes}')}`;
+  remendar('mobile-catalog.js', de, m => m.replace(`src="\${esc(${expr})}"`, tag), `fotos do catálogo: ${nome}`);
+}
+
+// Medidas de um arquivo de imagem (PNG, JPEG ou WebP), lidas do cabeçalho do arquivo.
+function medidas(arq) {
+  const b = fs.readFileSync(arq);
+  if (b.readUInt32BE(0) === 0x89504e47) return [b.readUInt32BE(16), b.readUInt32BE(20)];
+  if (b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') {
+    const t = b.toString('ascii', 12, 16);
+    if (t === 'VP8X') return [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
+    if (t === 'VP8L') { const n = b.readUInt32LE(21); return [1 + (n & 0x3fff), 1 + ((n >> 14) & 0x3fff)]; }
+    return [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff];
+  }
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    for (let i = 2; i < b.length - 9;) {
+      if (b[i] !== 0xff) { i++; continue; }
+      const m = b[i + 1], len = b.readUInt16BE(i + 2);
+      if (m >= 0xc0 && m <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(m)) return [b.readUInt16BE(i + 7), b.readUInt16BE(i + 5)];
+      i += 2 + len;
+    }
+  }
+  return null;
+}
+// Versão de cada arquivo (impressão digital curta do conteúdo), posta no endereço como ?v=... Assim o navegador
+// pode guardar fotos e fontes por um ano (vercel.json): quando o arquivo muda, o endereço muda junto.
+const versoes = new Map();
+const versao = u => {
+  if (!versoes.has(u)) {
+    const arq = path.join(ROOT, u);
+    versoes.set(u, fs.existsSync(arq) ? crypto.createHash('md5').update(fs.readFileSync(arq)).digest('hex').slice(0, 8) : null);
+  }
+  return versoes.get(u);
+};
+const PASTAS_VERSIONADAS = /^\/assets\/(?:img|cardapio|burgers|fonts|video|vendor)\//;
+const versionar = h => h.replace(/(["'(\s,])(\/assets\/[^"'()\s?#,]+\.(?:webp|jpe?g|png|svg|gif|avif|woff2?|mp4))(?=["')\s,])/g,
+  (m, antes, u) => { const v = PASTAS_VERSIONADAS.test(u) && versao(u); return v ? `${antes}${u}?v=${v}` : m; });
 
 // ---------------------------------------------------------------------------------------------
 // 3) Rodapé "Explore o Hicks": links fixos para o cardápio e os guias em todas as páginas.
@@ -245,6 +302,13 @@ for (const { origem, rota } of paginas) {
     // O player da playlist (sp-js) é trocado pela versão do montador (ver 5.2c).
     if (id === 'sp-js') codigo = PLAYER;
     if (id === 'rgmap-js') codigo = remendarMapa(codigo, rota);
+    // O ajuste de largura do topo (hk-mobile-cap, 1 KB) precisa rodar antes de tudo; como arquivo separado, a
+    // página esperava baixá-lo para começar a aparecer (o PageSpeed contava ~220 ms). Fica dentro da página e a
+    // política de segurança libera exatamente esse código pela impressão digital (sha256) gravada no vercel.json.
+    if (SCRIPTS_NA_PAGINA.has(id) && tipo !== 'module') {
+      impressoes.add(`'sha256-${crypto.createHash('sha256').update(codigo, 'utf8').digest('base64')}'`);
+      return `<script id="${id}">${codigo}</script>`;
+    }
     const hash = crypto.createHash('md5').update(codigo).digest('hex').slice(0, 8);
     const nome = `pagina-${id}-${hash}.js`;
     scriptsExtraidos.set(nome, codigo);
@@ -256,6 +320,49 @@ for (const { origem, rota } of paginas) {
     .replace(/\bsrcset="([^"]*)"/g, (m, v) => `srcset="${v.split(',').map(s => { const [u, w] = s.trim().split(/\s+/); return endereco(u) + (w ? ' ' + w : ''); }).join(', ')}"`)
     .replace(/url\((["']?)(?!data:|https?:|#)([^"')]+)\1\)/g, (m, q, u) => `url(${q}${endereco(u)}${q})`)
     .replace(/"(url|image)":"([^"]+)"/g, (m, k, u) => `"${k}":"${endereco(u)}"`);
+
+  // 5.2a Imagens no tamanho em que aparecem (PageSpeed, 18/11/2026: ~570 KB a mais só na página principal).
+  //  - Fotos e logos que aparecem miúdos ganham a lista de versões pequenas (VARIANTES, em otimizar-fotos.cjs).
+  h = h.replace(/<img\b[^>]*>/g, tag => {
+    if (/\bsrcset=/.test(tag)) return tag;
+    const src = (tag.match(/\bsrc="([^"]+)"/) || [])[1];
+    const v = src && VARIANTES.find(x => x.sizes && '/' + x.arq === src);
+    if (!v) return tag;
+    const [w] = medidas(path.join(ROOT, v.arq)) || [];
+    const lista = v.larguras.map(l => `${src.replace(/\.(\w+)$/, `-${l}.$1`)} ${l}w`).concat(w ? [`${src} ${w}w`] : []);
+    return tag.replace(/<img\b/, `<img srcset="${lista.join(', ')}" sizes="${v.sizes}"`);
+  });
+  //  - Burgers nas listas (cartões dos guias, itens do cardápio, ranking): o design punha sempre a de 480 px. Agora
+  //    o navegador escolhe entre 240, 320 e 480 px pelo tamanho do lugar (medido: 112 px no cardápio, até 176 nos cartões).
+  h = h.replace(/<img\b[^>]*\bsrc="(\/assets\/(?:burgers\/[a-z-]+|cardapio\/\d+))-480\.webp"[^>]*>/g, (tag, src, pos, todo) => {
+    if (/\bsrcset=/.test(tag)) return tag;
+    const tam = [240, 320].filter(l => fs.existsSync(path.join(ROOT, `${src}-${l}.webp`)));
+    if (!tam.length) return tag;
+    const lugar = (todo.slice(Math.max(0, pos - 400), pos).match(/class="(sx-card|sx-item|au-row)\b/g) || []).pop() || '';
+    const sizes = /sx-card/.test(lugar) ? 'min(41vw, 176px)' : '112px';
+    return tag.replace(/<img\b/, `<img srcset="${tam.map(l => `${src}-${l}.webp ${l}w`).concat(`${src}-480.webp 480w`).join(', ')}" sizes="${sizes}"`);
+  });
+  //  - O design dizia ao navegador que as fotos ocupam a largura da janela (100vw, 115vw...), mas a página é uma
+  //    coluna de no máximo 430 px: no computador ele baixava a maior versão. O tamanho ganha o limite da coluna.
+  h = h.replace(/(<(?:img|source)\b[^>]*\bsizes=")([^"]*)"/g, (m, ini, s) => {
+    const vw = s.match(/(\d+(?:\.\d+)?)vw\s*$/);
+    return vw ? `${ini}min(${vw[1]}vw, ${Math.round(+vw[1] * 4.3)}px)"` : m;
+  });
+  //  - Catálogo da página principal (dados lidos pelo mobile-catalog.js): cada foto leva a lista de versões.
+  h = h.replace(/(<script id="mobile-catalog-data" type="application\/json">)([\s\S]*?)(<\/script>)/, (m, a, dados, b) =>
+    a + dados.replace(/"image":"(\/assets\/cardapio\/(\d+))\.webp"/g, (mm, base, id) => {
+      const tam = [240, 320, 480, 800].filter(l => fs.existsSync(path.join(ROOT, `${base}-${l}.webp`)));
+      const [w] = medidas(path.join(ROOT, `${base}.webp`)) || [];
+      return tam.length && w ? `${mm},"srcset":"${tam.map(l => `${base}-${l}.webp ${l}w`).concat(`${base}.webp ${w}w`).join(', ')}"` : mm;
+    }) + b);
+  //  - Toda imagem do site com largura e altura escritas (sem elas a página "pula" enquanto a foto carrega).
+  h = h.replace(/<img\b[^>]*>/g, tag => {
+    if (/\bwidth=/.test(tag) && /\bheight=/.test(tag)) return tag;
+    const src = (tag.match(/\bsrc="(\/assets\/[^"]+)"/) || [])[1];
+    const d = src && fs.existsSync(path.join(ROOT, src)) && medidas(path.join(ROOT, src));
+    if (!d) return tag;
+    return tag.replace(/\s*\b(width|height)="[^"]*"/g, '').replace(/<img\b/, `<img width="${d[0]}" height="${d[1]}"`);
+  });
 
   // 5.2b Ícone do Spotify no topo: o design apontava para a página inicial do Spotify; vai para a playlist do Hicks
   //      (link enviado pelo Neto em 20/10/2026, sem os parâmetros de rastreio).
@@ -400,6 +507,9 @@ for (const { origem, rota } of paginas) {
   if ((h.match(/<h1[\s>]/g) || []).length !== 1) avisos.push(`${rota}: ${(h.match(/<h1[\s>]/g) || []).length} h1`);
   if (/\son[a-z]+="/i.test(h.slice(h.indexOf('<body')))) avisos.push(`${rota}: atributo on...="" (bloqueado pela política de segurança)`);
 
+  // 5.7 Versão no endereço de fotos, fontes e vídeo (cache de um ano; ver versao()).
+  h = versionar(h);
+
   resultado.push({ rota, url, html: h, foto: v.foto, h1: v.h1, perguntas: v.perguntas, seo });
 }
 
@@ -418,12 +528,27 @@ for (const r of resultado) {
 
 // Conferência de links internos e arquivos citados (todos precisam existir no site montado).
 const faltando = [];
-const existeRota = u => { const b = u.split('#')[0].replace(/^\//, ''); return b === '' || fs.existsSync(path.join(ROOT, b)) || fs.existsSync(path.join(ROOT, b + '.html')); };
+const existeRota = u => { const b = u.split('#')[0].split('?')[0].replace(/^\//, ''); return b === '' || fs.existsSync(path.join(ROOT, b)) || fs.existsSync(path.join(ROOT, b + '.html')); };
 for (const r of resultado) {
   for (const m of r.html.matchAll(/\b(?:src|href|data-src|poster)="(\/[^"]*)"/g)) if (!existeRota(m[1])) faltando.push(`${r.rota}: ${m[1]}`);
   for (const m of r.html.matchAll(/\bsrcset="([^"]*)"/g)) for (const s of m[1].split(',')) { const u = s.trim().split(/\s+/)[0]; if (u.startsWith('/') && !existeRota(u)) faltando.push(`${r.rota}: ${u}`); }
 }
 if (faltando.length) throw new Error('links ou arquivos inexistentes:\n' + [...new Set(faltando)].slice(0, 20).join('\n'));
+
+// Política de segurança (vercel.json): libera os scripts que ficaram dentro das páginas, pela impressão digital.
+{
+  const arq = path.join(ROOT, 'vercel.json');
+  const antes = fs.readFileSync(arq, 'utf8'), cfg = JSON.parse(antes);
+  let achou = false;
+  for (const regra of cfg.headers) for (const c of regra.headers) if (c.key === 'Content-Security-Policy') {
+    c.value = c.value.replace(/script-src [^;]*/, `script-src 'self'${[...impressoes].sort().map(i => ' ' + i).join('')}`);
+    achou = true;
+  }
+  if (!achou) avisos.push('vercel.json sem Content-Security-Policy: scripts dentro da página não liberados');
+  const depois = JSON.stringify(cfg, null, 2) + '\n';
+  if (depois !== antes) fs.writeFileSync(arq, depois);
+  if (impressoes.size > 1) avisos.push(`${impressoes.size} versões diferentes do script de dentro da página (esperado: 1)`);
+}
 
 // ---------------------------------------------------------------------------------------------
 // 7) Mapa do site (com fotos), robots.txt e llms.txt.

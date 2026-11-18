@@ -1,5 +1,5 @@
 (function(){var el=document.getElementById('mapa-entrega');if(!el)return;var started=false;
-function init(){if(started)return;started=true;var l=document.createElement('link');l.rel='stylesheet';l.href='/assets/vendor/leaflet/leaflet.css';document.head.appendChild(l);var s=document.createElement('script');s.src='/assets/vendor/leaflet/leaflet.js';s.onload=draw;document.head.appendChild(s)}
+function init(){if(started)return;started=true;var l=document.createElement('link');l.rel='stylesheet';l.href='/assets/vendor/leaflet/leaflet.css?v=c02c12fe';document.head.appendChild(l);var s=document.createElement('script');s.src='/assets/vendor/leaflet/leaflet.js?v=35b48eb9';s.onload=draw;document.head.appendChild(s)}
 function draw(){var L=window.L,loja=[-22.8897306,-47.1223038];var m=L.map(el,{scrollWheelZoom:false,dragging:!matchMedia('(pointer: coarse)').matches,touchZoom:true,doubleClickZoom:true,tap:false,zoomControl:true,minZoom:7,maxZoom:19});m.setView(loja,10);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
 L.circle(loja,{radius:15000,color:'#EA1D2C',weight:2,fillColor:'#EA1D2C',fillOpacity:.1}).addTo(m);
