@@ -123,3 +123,6 @@
 - O ajuste de largura do topo (hk-mobile-cap, 1 KB) deixou de ser arquivo separado, que a página esperava baixar para começar a aparecer (~220 ms). Fica dentro da página, liberado na política de segurança pela impressão digital exata do código (sha256), gravada no vercel.json pelo próprio montador.
 - Toda imagem com largura e altura escritas (faltava no logo do Spotify; a página "pulava" enquanto ele carregava).
 - Servidor local passou a respeitar as condições por parâmetro (has/missing) do vercel.json.
+
+## Rodada 13.3 — 18/11/2026 (cache dos scripts)
+- Os scripts da página (assets/js) também saem com a versão no endereço (?v=impressão digital) e cache de um ano. Antes o navegador conferia cada um com o servidor a cada visita. Os scripts tirados das páginas recebem a versão calculada pelo código, antes de serem gravados.

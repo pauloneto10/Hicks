@@ -232,13 +232,17 @@ function medidas(arq) {
 const versoes = new Map();
 const versao = u => {
   if (!versoes.has(u)) {
+    // Scripts tirados das páginas só são gravados no fim (passo 6): a versão sai do código guardado na memória.
+    const extraido = u.startsWith('/assets/js/') && scriptsExtraidos.get(path.basename(u));
     const arq = path.join(ROOT, u);
-    versoes.set(u, fs.existsSync(arq) ? crypto.createHash('md5').update(fs.readFileSync(arq)).digest('hex').slice(0, 8) : null);
+    const conteudo = extraido != null && extraido !== false ? extraido : fs.existsSync(arq) ? fs.readFileSync(arq) : null;
+    versoes.set(u, conteudo == null ? null : crypto.createHash('md5').update(conteudo).digest('hex').slice(0, 8));
   }
   return versoes.get(u);
 };
-const PASTAS_VERSIONADAS = /^\/assets\/(?:img|cardapio|burgers|fonts|video|vendor)\//;
-const versionar = h => h.replace(/(["'(\s,])(\/assets\/[^"'()\s?#,]+\.(?:webp|jpe?g|png|svg|gif|avif|woff2?|mp4))(?=["')\s,])/g,
+// Scripts (assets/js) também (pedido do Neto, 18/11/2026): o retorno ao site não precisa mais conferir cada um.
+const PASTAS_VERSIONADAS = /^\/assets\/(?:img|cardapio|burgers|fonts|video|vendor|js)\//;
+const versionar = h => h.replace(/(["'(\s,])(\/assets\/[^"'()\s?#,]+\.(?:webp|jpe?g|png|svg|gif|avif|woff2?|mp4|js))(?=["')\s,])/g,
   (m, antes, u) => { const v = PASTAS_VERSIONADAS.test(u) && versao(u); return v ? `${antes}${u}?v=${v}` : m; });
 
 // ---------------------------------------------------------------------------------------------
